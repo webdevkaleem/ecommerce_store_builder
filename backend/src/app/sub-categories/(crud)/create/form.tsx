@@ -13,7 +13,7 @@ import { type z } from "zod";
 // Local Imports
 
 import CategoriesTable from "@/app/categories/table";
-import FormLoadingOverlay from "@/components/admin/form-loading-overlay";
+import FormLoadingOverlay from "@/components/admin/form/form-loading-overlay";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -105,7 +105,7 @@ export default function CreateForm({
     });
   }
 
-  async function onReset() {
+  function onReset() {
     // Show toast, redirect and reset state
     toast.info("Discarded your changes");
 

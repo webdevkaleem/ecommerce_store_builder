@@ -1,19 +1,17 @@
 // Global Imports
 "use client";
 
-import { ArrowUpFromLine, LoaderCircle, X } from "lucide-react";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
-import { type z } from "zod";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
+import { useForm } from "react-hook-form";
 import { useHotkeys } from "react-hotkeys-hook";
 import { toast } from "sonner";
+import { type z } from "zod";
 
 // Local Imports
 
-import { Separator } from "@/components/ui/separator";
-import { Button } from "@/components/ui/button";
+import TopButtons from "@/components/admin/form/top-buttons";
 import {
   Form,
   FormControl,
@@ -23,6 +21,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
@@ -30,11 +29,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Input } from "@/components/ui/input";
-import { api } from "@/trpc/react";
+import { Separator } from "@/components/ui/separator";
 import { slugToLabel } from "@/lib/helper-functions";
-import FormLoadingOverlay from "@/components/admin/form-loading-overlay";
 import { selectCategory, selectVisibilityEnum } from "@/server/db/schema";
+import { api } from "@/trpc/react";
 
 // Body
 export default function EditForm(category: z.infer<typeof selectCategory>) {
@@ -44,30 +42,42 @@ export default function EditForm(category: z.infer<typeof selectCategory>) {
   const router = useRouter();
   const formRef = useRef(null);
 
+  // Consts
+  const backPathname = "/categories/" + `${category.id}`;
+
   // Derived Functions
   const { mutate, isPending, isSuccess, data, reset } =
-    api.category.create.useMutation();
+    api.category.edit.useMutation();
 
   // Initialize Form
   const form = useForm<z.infer<typeof selectCategory>>({
     resolver: zodResolver(selectCategory),
     defaultValues: {
+      id: category.id,
       name: category.name,
       visibility: category.visibility,
+      createdAt: category.createdAt,
+      updatedAt: category.updatedAt,
     },
   });
 
   // Helper Functions
   function onSubmit(values: z.infer<typeof selectCategory>) {
-    mutate({ name: values.name, visibility: values.visibility });
+    mutate({
+      id: values.id,
+      name: values.name,
+      visibility: values.visibility,
+      createdAt: values.createdAt,
+      updatedAt: values.updatedAt,
+    });
   }
 
-  async function onReset() {
+  function onReset() {
     // Show toast, redirect and reset state
     toast.info("Discarded your changes");
 
     // Redirect to categories page
-    router.push("/categories");
+    router.push(backPathname);
 
     // Reset state
     reset();
@@ -97,7 +107,7 @@ export default function EditForm(category: z.infer<typeof selectCategory>) {
         toast.success(data.message);
 
         // Redirect to categories page
-        router.push("/categories");
+        router.push(backPathname);
 
         // Reset state
         reset();
@@ -106,7 +116,7 @@ export default function EditForm(category: z.infer<typeof selectCategory>) {
         toast.error(data.message);
       }
     }
-  }, [data, isSuccess, reset, router]);
+  }, [backPathname, data, isSuccess, reset, router]);
 
   // Render
   return (
@@ -199,41 +209,11 @@ function HeroSection({
 }) {
   return (
     <div className="flex flex-col gap-8 xl:flex-row xl:items-center xl:justify-between">
-      <h1>Create Category</h1>
+      <h1>Edit Category</h1>
 
       {/* CRUD Buttons */}
       {/* The props are passed to the top buttons to show loading states */}
       <TopButtons pushChangesLoading={pushChangesLoading} />
     </div>
-  );
-}
-
-function TopButtons({
-  pushChangesLoading = false,
-}: {
-  pushChangesLoading?: boolean;
-}) {
-  return (
-    <>
-      <div className="flex gap-3">
-        <Button variant={"destructive"} type="reset">
-          <X />
-          <span>Discard</span>
-        </Button>
-        <Button type="submit" disabled={pushChangesLoading}>
-          <div className="flex items-center gap-2">
-            {pushChangesLoading ? (
-              <LoaderCircle className="animate-spin" />
-            ) : (
-              <ArrowUpFromLine />
-            )}
-            <span>Push Changes</span>
-          </div>
-        </Button>
-      </div>
-
-      {/* Loading overlay which is animated */}
-      {pushChangesLoading && <FormLoadingOverlay />}
-    </>
   );
 }

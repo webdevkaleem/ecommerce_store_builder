@@ -1,7 +1,7 @@
 import { labelToSlug, slugToLabel } from "@/lib/helper-functions";
 import { createTRPCRouter, publicProcedure } from "@/server/api/trpc";
 import { db } from "@/server/db";
-import { category, insertCategory } from "@/server/db/schema";
+import { category, insertCategory, selectCategory } from "@/server/db/schema";
 import { count, desc, eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
@@ -18,47 +18,67 @@ export const categoryRouter = createTRPCRouter({
       }),
     )
     .query(async ({ input }) => {
-      const page = Array.isArray(input.page)
-        ? Number(input.page[0])
-        : Number(input.page);
-      const pageSize = Array.isArray(input.pageSize)
-        ? Number(input.pageSize[0])
-        : Number(input.pageSize);
+      try {
+        const page = Array.isArray(input.page)
+          ? Number(input.page[0])
+          : Number(input.page);
+        const pageSize = Array.isArray(input.pageSize)
+          ? Number(input.pageSize[0])
+          : Number(input.pageSize);
 
-      const filteredCategories = await db.query.category.findMany({
-        orderBy: desc(category.updatedAt),
-        limit: pageSize,
-        offset: (page - 1) * pageSize,
-      });
+        const filteredCategories = await db.query.category.findMany({
+          orderBy: desc(category.updatedAt),
+          limit: pageSize,
+          offset: (page - 1) * pageSize,
+        });
 
-      const allCategoriesCount = await db
-        .select({ count: count() })
-        .from(category);
+        const allCategoriesCount = await db
+          .select({ count: count() })
+          .from(category);
 
-      return {
-        status: "success",
-        data: filteredCategories,
-        maxRows: allCategoriesCount[0]?.count ?? 0,
-        maxPages: allCategoriesCount[0]
-          ? Math.ceil(allCategoriesCount[0]?.count / pageSize)
-          : 1,
-      };
+        return {
+          status: "success",
+          data: filteredCategories,
+          maxRows: allCategoriesCount[0]?.count ?? 0,
+          maxPages: allCategoriesCount[0]
+            ? Math.ceil(allCategoriesCount[0]?.count / pageSize)
+            : 1,
+        };
+      } catch (error) {
+        return {
+          status: "fail",
+          message:
+            error instanceof Error
+              ? CategoryMessageBuilder(error.message)
+              : "Something went wrong",
+        };
+      }
     }),
 
   byId: publicProcedure
     .input(z.object({ id: z.number() }))
     .query(async ({ input }) => {
-      const categorySelected = await db
-        .select()
-        .from(category)
-        .limit(1)
-        .where(eq(category.id, input.id))
-        .execute();
+      try {
+        const categorySelected = await db
+          .select()
+          .from(category)
+          .limit(1)
+          .where(eq(category.id, input.id))
+          .execute();
 
-      return {
-        status: "success",
-        data: categorySelected[0],
-      };
+        return {
+          status: "success",
+          data: categorySelected[0],
+        };
+      } catch (error) {
+        return {
+          status: "fail",
+          message:
+            error instanceof Error
+              ? CategoryMessageBuilder(error.message)
+              : "Something went wrong",
+        };
+      }
     }),
 
   create: publicProcedure.input(insertCategory).mutation(async ({ input }) => {
@@ -78,9 +98,32 @@ export const categoryRouter = createTRPCRouter({
         message: `Added new category: "${slugToLabel(newCategory[0]?.name ?? "")}" into the database`,
       };
     } catch (error) {
-      // Optional error handling
-      // If the error is an instance of Error, then we can use the CategoryMessageBuilder function to handle the error message
-      // Otherwise, we can use the default error message
+      return {
+        status: "fail",
+        message:
+          error instanceof Error
+            ? CategoryMessageBuilder(error.message)
+            : "Something went wrong",
+      };
+    }
+  }),
+
+  edit: publicProcedure.input(selectCategory).mutation(async ({ input }) => {
+    try {
+      const updatedCategory = await db
+        .update(category)
+        .set({
+          name: labelToSlug(input.name),
+          visibility: input.visibility,
+        })
+        .where(eq(category.id, input.id))
+        .returning();
+
+      return {
+        status: "success",
+        message: `Updated category "${slugToLabel(updatedCategory[0]?.name ?? "")}" in the database`,
+      };
+    } catch (error) {
       return {
         status: "fail",
         message:
@@ -111,7 +154,9 @@ export const categoryRouter = createTRPCRouter({
         return {
           status: "fail",
           message:
-            error instanceof Error ? error.message : "Something went wrong",
+            error instanceof Error
+              ? CategoryMessageBuilder(error.message)
+              : "Something went wrong",
         };
       }
     }),
@@ -136,9 +181,6 @@ export const categoryRouter = createTRPCRouter({
           message: `Removed category "${slugToLabel(categoryName)}" from the database`,
         };
       } catch (error) {
-        // Optional error handling
-        // If the error is an instance of Error, then we can use the CategoryMessageBuilder function to handle the error message
-        // Otherwise, we can use the default error message
         return {
           status: "fail",
           message:

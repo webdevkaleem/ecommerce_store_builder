@@ -33,7 +33,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { api } from "@/trpc/react";
 import { slugToLabel } from "@/lib/helper-functions";
-import FormLoadingOverlay from "@/components/admin/form-loading-overlay";
+import FormLoadingOverlay from "@/components/admin/form/form-loading-overlay";
 import { insertCategory, selectVisibilityEnum } from "@/server/db/schema";
 
 // Body
@@ -62,7 +62,7 @@ export default function CreateForm() {
     mutate({ name: values.name, visibility: values.visibility });
   }
 
-  async function onReset() {
+  function onReset() {
     // Show toast, redirect and reset state
     toast.info("Discarded your changes");
 
