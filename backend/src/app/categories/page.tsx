@@ -67,7 +67,7 @@ async function SearchTable({ searchParams }: SearchParamsType) {
     sortOrder = "desc",
   } = await searchParams;
 
-  const allCategories = await api.category.all({
+  const { data, maxPages, maxRows } = await api.category.all({
     page,
     pageSize,
     sortBy,
@@ -77,9 +77,9 @@ async function SearchTable({ searchParams }: SearchParamsType) {
   return (
     <div className="flex flex-col gap-4">
       <CategoriesTable
-        data={allCategories.data}
-        maxPages={allCategories.maxPages}
-        maxRows={allCategories.maxRows}
+        data={data ?? []}
+        maxPages={maxPages ?? 0}
+        maxRows={maxRows ?? 0}
         collection={collection}
       />
     </div>

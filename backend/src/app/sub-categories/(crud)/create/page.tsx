@@ -38,6 +38,10 @@ async function CategoryTableWrapper({ searchParams }: SearchParamsType) {
   });
 
   return (
-    <CreateForm allCategories={data} maxPages={maxPages} maxRows={maxRows} />
+    <CreateForm
+      allCategories={data ?? []}
+      maxPages={maxPages ?? 0}
+      maxRows={maxRows ?? 0}
+    />
   );
 }
