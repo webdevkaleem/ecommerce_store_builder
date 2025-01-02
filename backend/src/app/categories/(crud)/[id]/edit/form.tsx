@@ -31,7 +31,11 @@ import {
 } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { slugToLabel } from "@/lib/helper-functions";
-import { selectCategory, selectVisibilityEnum } from "@/server/db/schema";
+import {
+  categoryNameSchema,
+  selectCategory,
+  selectVisibilityEnum,
+} from "@/server/db/schema";
 import { api } from "@/trpc/react";
 
 // Body
@@ -63,6 +67,18 @@ export default function EditForm(category: z.infer<typeof selectCategory>) {
 
   // Helper Functions
   function onSubmit(values: z.infer<typeof selectCategory>) {
+    // 1. Special Checks
+    // This checks if the name is valid. This is required as drizzle won't check for stuff like min characters
+    const categoryName = categoryNameSchema.safeParse(values.name);
+
+    // If the name is invalid then we show an error message on the form and return
+    if (categoryName.error) {
+      const errorMessage = categoryName.error.format();
+      form.setError("name", { message: errorMessage._errors.join(". ") });
+      return;
+    }
+
+    // 2. Submit
     mutate({
       id: values.id,
       name: values.name,

@@ -1,7 +1,12 @@
 import { labelToSlug, slugToLabel } from "@/lib/helper-functions";
 import { createTRPCRouter, publicProcedure } from "@/server/api/trpc";
 import { db } from "@/server/db";
-import { category, insertCategory, selectCategory } from "@/server/db/schema";
+import {
+  category,
+  categoryNameSchema,
+  insertCategory,
+  selectCategory,
+} from "@/server/db/schema";
 import { count, desc, eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
@@ -83,6 +88,18 @@ export const categoryRouter = createTRPCRouter({
 
   create: publicProcedure.input(insertCategory).mutation(async ({ input }) => {
     try {
+      // 1. Special Checks
+      // This checks if the name is valid. This is required as drizzle won't check for stuff like min characters
+      const categoryName = categoryNameSchema.safeParse(
+        labelToSlug(input.name),
+      );
+
+      if (categoryName.error) {
+        throw new Error("Invalid category name");
+      }
+
+      console.log(categoryName, "CHECk");
+
       const newCategory = await db
         .insert(category)
         .values({

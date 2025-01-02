@@ -34,7 +34,11 @@ import { Input } from "@/components/ui/input";
 import { api } from "@/trpc/react";
 import { slugToLabel } from "@/lib/helper-functions";
 import FormLoadingOverlay from "@/components/admin/form/form-loading-overlay";
-import { insertCategory, selectVisibilityEnum } from "@/server/db/schema";
+import {
+  categoryNameSchema,
+  insertCategory,
+  selectVisibilityEnum,
+} from "@/server/db/schema";
 
 // Body
 export default function CreateForm() {
@@ -59,6 +63,18 @@ export default function CreateForm() {
 
   // Helper Functions
   function onSubmit(values: z.infer<typeof insertCategory>) {
+    // 1. Special Checks
+    // This checks if the name is valid. This is required as drizzle won't check for stuff like min characters
+    const categoryName = categoryNameSchema.safeParse(values.name);
+
+    // If the name is invalid then we show an error message on the form and return
+    if (categoryName.error) {
+      const errorMessage = categoryName.error.format();
+      form.setError("name", { message: errorMessage._errors.join(". ") });
+      return;
+    }
+
+    // 2. Submit
     mutate({ name: values.name, visibility: values.visibility });
   }
 
@@ -91,7 +107,7 @@ export default function CreateForm() {
   // Effects
   useEffect(() => {
     // We check for both to be successful because of rerendering issues
-    if (isSuccess) {
+    if (isSuccess && data) {
       // If push changes (save) is successful then we show a toast and redirect to the categories page
       if (data.status === "success") {
         toast.success(data.message);

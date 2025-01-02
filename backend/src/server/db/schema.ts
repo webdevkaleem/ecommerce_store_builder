@@ -10,6 +10,7 @@ import {
 } from "drizzle-orm/pg-core";
 
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
+import { z } from "zod";
 
 // Local Imports
 
@@ -78,10 +79,16 @@ export const subCategoryRelations = relations(subCategory, ({ one }) => ({
 }));
 
 // Types
-export const insertCategory = createInsertSchema(category);
-export const selectCategory = createSelectSchema(category);
-
+// Other
 export const selectVisibilityEnum = createSelectSchema(visibilityObj);
 
+// Category
+export const insertCategory = createInsertSchema(category);
+export const selectCategory = createSelectSchema(category);
+export const categoryNameSchema = z
+  .string()
+  .min(1, "String must contain atleast 1 character(s)");
+
+// Sub Category
 export const insertSubCategory = createInsertSchema(subCategory);
 export const selectSubCategory = createSelectSchema(subCategory);
