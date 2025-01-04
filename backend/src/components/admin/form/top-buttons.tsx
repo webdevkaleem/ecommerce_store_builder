@@ -1,3 +1,5 @@
+"use client";
+
 import { Button } from "@/components/ui/button";
 import { ArrowUpFromLine, LoaderCircle, X } from "lucide-react";
 import FormLoadingOverlay from "./form-loading-overlay";

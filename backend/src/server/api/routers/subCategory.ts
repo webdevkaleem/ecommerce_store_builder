@@ -11,6 +11,8 @@ import { count, desc, eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 
+const revalidatePathString = "/sub-categories";
+
 export const subCategoryRouter = createTRPCRouter({
   all: publicProcedure
     .input(
@@ -118,7 +120,7 @@ export const subCategoryRouter = createTRPCRouter({
             message: `Could not add the sub category "${input.name}" into the database`,
           };
 
-        revalidatePath("/sub-categories");
+        revalidatePath(revalidatePathString);
 
         return {
           status: "success",
@@ -133,32 +135,30 @@ export const subCategoryRouter = createTRPCRouter({
       }
     }),
 
-  edit: publicProcedure
-    .input(selectSubCategory.omit({ createdAt: true, updatedAt: true }))
-    .mutation(async ({ input }) => {
-      try {
-        const updatedSubCategory = await db
-          .update(subCategory)
-          .set({
-            name: labelToSlug(input.name),
-            visibility: input.visibility,
-            categoryId: input.categoryId,
-          })
-          .where(eq(category.id, input.id))
-          .returning();
+  edit: publicProcedure.input(selectSubCategory).mutation(async ({ input }) => {
+    try {
+      console.log(input);
+      await db
+        .update(subCategory)
+        .set({
+          name: labelToSlug(input.name),
+          visibility: input.visibility,
+          categoryId: input.categoryId,
+        })
+        .where(eq(subCategory.id, input.id));
 
-        return {
-          status: "success",
-          message: `Updated sub category "${slugToLabel(updatedSubCategory[0]?.name ?? "")}" in the database`,
-        };
-      } catch (error) {
-        return {
-          status: "fail",
-          message:
-            error instanceof Error ? error.message : "Something went wrong",
-        };
-      }
-    }),
+      return {
+        status: "success",
+        message: `Updated sub category "${slugToLabel(labelToSlug(input?.name) ?? "")}" in the database`,
+      };
+    } catch (error) {
+      return {
+        status: "fail",
+        message:
+          error instanceof Error ? error.message : "Something went wrong",
+      };
+    }
+  }),
 
   removeAll: publicProcedure
     .input(z.object({ ids: z.number().array() }))
@@ -170,7 +170,7 @@ export const subCategoryRouter = createTRPCRouter({
 
         await Promise.all(allSubCategoriesDeleted);
 
-        revalidatePath("/sub-categories");
+        revalidatePath(revalidatePathString);
 
         return {
           status: "success",
