@@ -2,7 +2,7 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { ArrowUpFromLine, Edit, LoaderCircle, X } from "lucide-react";
+import { Edit, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
@@ -13,7 +13,7 @@ import { type z } from "zod";
 // Local Imports
 
 import CategoriesTable from "@/app/categories/table";
-import FormLoadingOverlay from "@/components/admin/form/form-loading-overlay";
+import TopButtons from "@/components/admin/form/top-buttons";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -33,9 +33,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
-import { slugToLabel } from "@/lib/helper-functions";
-import { useCreateSubCategoryStore } from "@/store/admin/create-sub-category";
-import { api } from "@/trpc/react";
 import {
   Sheet,
   SheetContent,
@@ -44,12 +41,15 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
+import { slugToLabel } from "@/lib/helper-functions";
 import {
   insertSubCategory,
   type selectCategory,
   selectVisibilityEnum,
   subCategoryNameSchema,
 } from "@/server/db/schema";
+import { useCreateSubCategoryStore } from "@/store/admin/create-sub-category";
+import { api } from "@/trpc/react";
 
 // Body
 export default function CreateForm({
@@ -348,35 +348,5 @@ function HeroSection({
       {/* The props are passed to the top buttons to show loading states */}
       <TopButtons pushChangesLoading={pushChangesLoading} />
     </div>
-  );
-}
-
-function TopButtons({
-  pushChangesLoading = false,
-}: {
-  pushChangesLoading?: boolean;
-}) {
-  return (
-    <>
-      <div className="flex gap-3">
-        <Button variant={"destructive"} type="reset">
-          <X />
-          <span>Discard</span>
-        </Button>
-        <Button type="submit" disabled={pushChangesLoading}>
-          <div className="flex items-center gap-2">
-            {pushChangesLoading ? (
-              <LoaderCircle className="animate-spin" />
-            ) : (
-              <ArrowUpFromLine />
-            )}
-            <span>Push Changes</span>
-          </div>
-        </Button>
-      </div>
-
-      {/* Loading overlay which is animated */}
-      {pushChangesLoading && <FormLoadingOverlay />}
-    </>
   );
 }

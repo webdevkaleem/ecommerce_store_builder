@@ -2,7 +2,7 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { ArrowUpFromLine, Edit, LoaderCircle, X } from "lucide-react";
+import { Edit, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
@@ -13,7 +13,7 @@ import { type z } from "zod";
 // Local Imports
 
 import CategoriesTable from "@/app/categories/table";
-import FormLoadingOverlay from "@/components/admin/form/form-loading-overlay";
+import TopButtons from "@/components/admin/form/top-buttons";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -33,9 +33,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
-import { slugToLabel } from "@/lib/helper-functions";
-import { useCreateSubCategoryStore } from "@/store/admin/create-sub-category";
-import { api } from "@/trpc/react";
 import {
   Sheet,
   SheetContent,
@@ -44,13 +41,15 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
+import { slugToLabel } from "@/lib/helper-functions";
 import {
   type selectCategory,
   selectSubCategory,
   selectVisibilityEnum,
   subCategoryNameSchema,
 } from "@/server/db/schema";
-import TopButtons from "@/components/admin/form/top-buttons";
+import { useCreateSubCategoryStore } from "@/store/admin/create-sub-category";
+import { api } from "@/trpc/react";
 
 // Body
 export default function CreateForm({

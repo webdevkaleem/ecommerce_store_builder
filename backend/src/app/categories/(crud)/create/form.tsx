@@ -1,19 +1,17 @@
 // Global Imports
 "use client";
 
-import { ArrowUpFromLine, LoaderCircle, X } from "lucide-react";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
-import { type z } from "zod";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
+import { useForm } from "react-hook-form";
 import { useHotkeys } from "react-hotkeys-hook";
 import { toast } from "sonner";
+import { type z } from "zod";
 
 // Local Imports
 
-import { Separator } from "@/components/ui/separator";
-import { Button } from "@/components/ui/button";
+import TopButtons from "@/components/admin/form/top-buttons";
 import {
   Form,
   FormControl,
@@ -23,6 +21,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
@@ -30,15 +29,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Input } from "@/components/ui/input";
-import { api } from "@/trpc/react";
+import { Separator } from "@/components/ui/separator";
 import { slugToLabel } from "@/lib/helper-functions";
-import FormLoadingOverlay from "@/components/admin/form/form-loading-overlay";
 import {
   categoryNameSchema,
   insertCategory,
   selectVisibilityEnum,
 } from "@/server/db/schema";
+import { api } from "@/trpc/react";
 
 // Body
 export default function CreateForm() {
@@ -221,35 +219,5 @@ function HeroSection({
       {/* The props are passed to the top buttons to show loading states */}
       <TopButtons pushChangesLoading={pushChangesLoading} />
     </div>
-  );
-}
-
-function TopButtons({
-  pushChangesLoading = false,
-}: {
-  pushChangesLoading?: boolean;
-}) {
-  return (
-    <>
-      <div className="flex gap-3">
-        <Button variant={"destructive"} type="reset">
-          <X />
-          <span>Discard</span>
-        </Button>
-        <Button type="submit" disabled={pushChangesLoading}>
-          <div className="flex items-center gap-2">
-            {pushChangesLoading ? (
-              <LoaderCircle className="animate-spin" />
-            ) : (
-              <ArrowUpFromLine />
-            )}
-            <span>Push Changes</span>
-          </div>
-        </Button>
-      </div>
-
-      {/* Loading overlay which is animated */}
-      {pushChangesLoading && <FormLoadingOverlay />}
-    </>
   );
 }
