@@ -10,17 +10,18 @@ import Loader from "@/components/admin/animations/loader";
 import DeleteAllModel from "@/components/admin/models/sub-category/delete-all";
 import DeleteByIdModel from "@/components/admin/models/sub-category/delete-by-id";
 import { type CollectionsType } from "@/lib/const";
-
-type SearchParamsType = {
-  searchParams: Promise<Record<string, string | string[] | undefined>>;
-};
+import { type SearchParamsType } from "@/lib/helper-functions";
 
 const collection: CollectionsType = {
   singular: "Sub Category",
   plural: "Sub Categories",
 };
 
-export default function Page({ searchParams }: SearchParamsType) {
+export default function Page({
+  searchParams,
+}: {
+  searchParams: SearchParamsType;
+}) {
   return (
     <>
       {/* Main Section */}
@@ -61,7 +62,11 @@ function HeroSection() {
   );
 }
 
-async function SearchTable({ searchParams }: SearchParamsType) {
+async function SearchTable({
+  searchParams,
+}: {
+  searchParams: SearchParamsType;
+}) {
   const {
     page = "1",
     pageSize = "10",

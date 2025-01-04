@@ -17,7 +17,11 @@ const collection: CollectionsType = {
   plural: "Categories",
 };
 
-export default function Page({ searchParams }: SearchParamsType) {
+export default function Page({
+  searchParams,
+}: {
+  searchParams: SearchParamsType;
+}) {
   return (
     <>
       {/* Main Section */}
@@ -59,7 +63,11 @@ function HeroSection() {
   );
 }
 
-async function SearchTable({ searchParams }: SearchParamsType) {
+async function SearchTable({
+  searchParams,
+}: {
+  searchParams: SearchParamsType;
+}) {
   const {
     page = "1",
     pageSize = "10",

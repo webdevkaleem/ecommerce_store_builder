@@ -92,3 +92,6 @@ export const categoryNameSchema = z
 // Sub Category
 export const insertSubCategory = createInsertSchema(subCategory);
 export const selectSubCategory = createSelectSchema(subCategory);
+export const subCategoryNameSchema = z
+  .string()
+  .min(1, "String must contain atleast 1 character(s)");

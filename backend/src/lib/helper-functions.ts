@@ -24,9 +24,9 @@ export function fakeDelay(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-export type SearchParamsType = {
-  searchParams: Promise<Record<string, string | string[] | undefined>>;
-};
+export type SearchParamsType = Promise<
+  Record<string, string | string[] | undefined>
+>;
 
 export type ParamsId = Promise<{ id: string }>;
 

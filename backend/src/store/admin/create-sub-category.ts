@@ -2,6 +2,7 @@ import { create } from "zustand";
 
 interface CreateSubCategoryActions {
   setCategoryName: (categoryName: string | undefined) => void;
+  setCategoryId: (categoryId: number | undefined) => void;
   toggleShow: () => void;
   resetCreateSubCategory: () => void;
 }
@@ -23,6 +24,7 @@ export const useCreateSubCategoryStore = create<
 >()((set, get) => ({
   ...initialState,
   setCategoryName: (categoryName) => set(() => ({ categoryName })),
+  setCategoryId: (categoryId) => set(() => ({ categoryId })),
   toggleShow: () =>
     set(() => {
       const { show } = get();

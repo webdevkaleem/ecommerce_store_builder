@@ -10,7 +10,11 @@ import Loader from "@/components/admin/animations/loader";
 
 // Body
 
-export default function Page({ searchParams }: SearchParamsType) {
+export default function Page({
+  searchParams,
+}: {
+  searchParams: SearchParamsType;
+}) {
   return (
     <>
       <Suspense fallback={<Loader />}>
@@ -22,7 +26,11 @@ export default function Page({ searchParams }: SearchParamsType) {
   );
 }
 
-async function CategoryTableWrapper({ searchParams }: SearchParamsType) {
+async function CategoryTableWrapper({
+  searchParams,
+}: {
+  searchParams: SearchParamsType;
+}) {
   const {
     page = "1",
     pageSize = "10",

@@ -45,18 +45,20 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import {
-  insertSubCategory,
   type selectCategory,
+  selectSubCategory,
   selectVisibilityEnum,
   subCategoryNameSchema,
 } from "@/server/db/schema";
 
 // Body
 export default function CreateForm({
+  subCategory,
   allCategories,
   maxPages,
   maxRows,
 }: {
+  subCategory: z.infer<typeof selectSubCategory> & { categoryName: string };
   allCategories: z.infer<typeof selectCategory>[];
   maxPages: number;
   maxRows: number;
@@ -72,6 +74,8 @@ export default function CreateForm({
     resetCreateSubCategory,
     show,
     categoryId: storeCategoryId,
+    setCategoryId,
+    setCategoryName,
     toggleShow,
   } = useCreateSubCategoryStore();
 
@@ -84,20 +88,20 @@ export default function CreateForm({
 
   // Derived Functions
   const { mutate, isPending, isSuccess, data, reset } =
-    api.subCategory.create.useMutation();
+    api.subCategory.edit.useMutation();
 
   // Initialize Form
-  const form = useForm<z.infer<typeof insertSubCategory>>({
-    resolver: zodResolver(insertSubCategory),
+  const form = useForm<z.infer<typeof selectSubCategory>>({
+    resolver: zodResolver(selectSubCategory),
     defaultValues: {
-      name: "",
-      visibility,
-      categoryId: categoryId,
+      name: subCategory.name,
+      visibility: subCategory.visibility,
+      categoryId: subCategory.categoryId,
     },
   });
 
   // Helper Functions
-  function onSubmit(values: z.infer<typeof insertSubCategory>) {
+  function onSubmit(values: z.infer<typeof selectSubCategory>) {
     // 1. Special Checks
     // This checks if the name is valid. This is required as drizzle won't check for stuff like min characters
     const subCategoryName = subCategoryNameSchema.safeParse(values.name);
@@ -114,7 +118,7 @@ export default function CreateForm({
       name: values.name,
       visibility: values.visibility,
       categoryId: categoryId,
-      categoryName: categoryName,
+      id: values.id,
     });
   }
 
@@ -146,10 +150,18 @@ export default function CreateForm({
   });
 
   // Effects
-  // Setting the categoryName from the store into the form on change
+  // Setting the categoryId from the store into the form on change
   useEffect(() => {
-    form.setValue("categoryId", storeCategoryId ?? 0);
-  }, [form, storeCategoryId]);
+    form.setValue("categoryId", categoryId ?? 0);
+  }, [form, categoryId]);
+
+  // On the component mount we reset the store and set the values from the form into the state
+  useEffect(() => {
+    resetCreateSubCategory();
+
+    setCategoryId(subCategory.categoryId);
+    setCategoryName(subCategory.categoryName);
+  }, [resetCreateSubCategory, setCategoryId, setCategoryName, subCategory]);
 
   useEffect(() => {
     // We check for both to be successful because of rerendering issues
@@ -172,11 +184,6 @@ export default function CreateForm({
       // If push changes (save) is unsuccessful then we show a toast and we don't redirect
     }
   }, [data, isSuccess, reset, resetCreateSubCategory, router]);
-
-  // On the component mount we reset the store
-  useEffect(() => {
-    resetCreateSubCategory();
-  }, [resetCreateSubCategory]);
 
   // Render
   return (
@@ -342,7 +349,7 @@ function HeroSection({
 }) {
   return (
     <div className="flex flex-col gap-8 xl:flex-row xl:items-center xl:justify-between">
-      <h1>Create Sub Category</h1>
+      <h1>Edit Sub Category</h1>
 
       {/* CRUD Buttons */}
       {/* The props are passed to the top buttons to show loading states */}

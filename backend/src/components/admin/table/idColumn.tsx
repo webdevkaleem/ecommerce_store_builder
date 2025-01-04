@@ -47,7 +47,7 @@ export function IdHeader({ table, collection }: ActionsType) {
 export function IdCell({ row, table, collection }: ActionsType) {
   // States / Hooks
   const pathname = usePathname();
-  const { setCategoryName, categoryName, toggleShow } =
+  const { setCategoryName, categoryName, toggleShow, setCategoryId } =
     useCreateSubCategoryStore();
 
   if (!row) return null;
@@ -59,16 +59,20 @@ export function IdCell({ row, table, collection }: ActionsType) {
       <Checkbox
         checked={categoryName === String(row.original.name) ? true : false}
         onCheckedChange={(value) => {
+          // On every instance we should reset the tables selected rows
           table.resetRowSelection();
           row.toggleSelected(!!value);
 
-          toggleShow();
-
+          // The same row has been checked, and thus we do nothing
           if (categoryName === String(row.original.name)) {
-            setCategoryName(undefined);
+            return;
           }
 
-          return setCategoryName(String(row.original.name));
+          // A different row is checked so we set the values and close the modal
+          setCategoryName(String(row.original.name));
+          setCategoryId(row.original.id);
+          toggleShow();
+          return;
         }}
         aria-label="Select row"
       />

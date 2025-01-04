@@ -1,7 +1,12 @@
 import { labelToSlug, slugToLabel } from "@/lib/helper-functions";
 import { createTRPCRouter, publicProcedure } from "@/server/api/trpc";
 import { db } from "@/server/db";
-import { category, insertSubCategory, subCategory } from "@/server/db/schema";
+import {
+  category,
+  insertSubCategory,
+  selectSubCategory,
+  subCategory,
+} from "@/server/db/schema";
 import { count, desc, eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
@@ -44,6 +49,45 @@ export const subCategoryRouter = createTRPCRouter({
       };
     }),
 
+  byId: publicProcedure
+    .input(z.object({ id: z.number() }))
+    .query(async ({ input }) => {
+      try {
+        // const subCategorySelected = await db
+        //   .select()
+        //   .from(subCategory)
+        //   .limit(1)
+        //   .where(eq(subCategory.id, input.id))
+        //   .execute();
+
+        const subCategorySelected = await db.query.subCategory.findFirst({
+          where: eq(subCategory.id, input.id),
+          columns: {
+            categoryId: false,
+          },
+          with: {
+            categoryId: {
+              columns: {
+                name: true,
+                id: true,
+              },
+            },
+          },
+        });
+
+        return {
+          status: "success",
+          data: subCategorySelected,
+        };
+      } catch (error) {
+        return {
+          status: "fail",
+          message:
+            error instanceof Error ? error.message : "Something went wrong",
+        };
+      }
+    }),
+
   create: publicProcedure
     .input(insertSubCategory)
     .input(
@@ -79,6 +123,33 @@ export const subCategoryRouter = createTRPCRouter({
         return {
           status: "success",
           message: `Added new sub category: "${slugToLabel(newSubCategory[0]?.name ?? "")}" into the database`,
+        };
+      } catch (error) {
+        return {
+          status: "fail",
+          message:
+            error instanceof Error ? error.message : "Something went wrong",
+        };
+      }
+    }),
+
+  edit: publicProcedure
+    .input(selectSubCategory.omit({ createdAt: true, updatedAt: true }))
+    .mutation(async ({ input }) => {
+      try {
+        const updatedSubCategory = await db
+          .update(subCategory)
+          .set({
+            name: labelToSlug(input.name),
+            visibility: input.visibility,
+            categoryId: input.categoryId,
+          })
+          .where(eq(category.id, input.id))
+          .returning();
+
+        return {
+          status: "success",
+          message: `Updated sub category "${slugToLabel(updatedSubCategory[0]?.name ?? "")}" in the database`,
         };
       } catch (error) {
         return {
