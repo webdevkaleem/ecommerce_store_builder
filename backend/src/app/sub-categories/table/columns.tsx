@@ -37,18 +37,29 @@ export const columns: ColumnDef<z.infer<typeof selectSubCategory>>[] = [
   { accessorKey: "id", header: "ID", enableHiding: false },
   {
     accessorKey: "name",
-    header: "Name",
+    header: () => {
+      return <div className="line-clamp-1 truncate">Name</div>;
+    },
     cell: ({ row }) => {
-      return <div>{slugToLabel(row.getValue("name"))}</div>;
+      return (
+        <div className="line-clamp-1 truncate">
+          {slugToLabel(row.getValue("name"))}
+        </div>
+      );
     },
   },
   {
     accessorKey: "categoryId",
-    header: "Category",
+    header: () => {
+      return <div className="line-clamp-1 truncate">Category</div>;
+    },
     enableHiding: false,
     cell: ({ row }) => {
       return (
-        <Link href={"/categories/" + String(row.getValue("categoryId"))}>
+        <Link
+          href={"/categories/" + String(row.getValue("categoryId"))}
+          className="line-clamp-1 truncate"
+        >
           <Badge variant="outline">Category</Badge>
         </Link>
       );
@@ -56,9 +67,15 @@ export const columns: ColumnDef<z.infer<typeof selectSubCategory>>[] = [
   },
   {
     accessorKey: "visibility",
-    header: "Visibility",
+    header: () => {
+      return <div className="line-clamp-1 truncate">Visibility</div>;
+    },
     cell: ({ row }) => {
-      return <div>{slugToLabel(row.getValue("visibility"))}</div>;
+      return (
+        <div className="line-clamp-1 truncate">
+          {slugToLabel(row.getValue("visibility"))}
+        </div>
+      );
     },
   },
   {
@@ -66,7 +83,7 @@ export const columns: ColumnDef<z.infer<typeof selectSubCategory>>[] = [
     header: ({ column }) => {
       return (
         <div
-          className="flex cursor-pointer select-none items-center gap-2"
+          className="line-clamp-1 flex cursor-pointer select-none items-center gap-2 truncate"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
           Updated At
@@ -80,7 +97,11 @@ export const columns: ColumnDef<z.infer<typeof selectSubCategory>>[] = [
         timeStyle: "short",
       });
 
-      return <div>{f.format(row.getValue("updatedAt"))}</div>;
+      return (
+        <div className="line-clamp-1 truncate">
+          {f.format(row.getValue("updatedAt"))}
+        </div>
+      );
     },
   },
 

@@ -46,7 +46,7 @@ export function DataTablePagination<TData>({
 
   // Render
   return (
-    <div className="flex flex-col gap-2 px-2 sm:flex-row sm:items-center sm:justify-center sm:gap-0">
+    <div className="flex flex-col gap-2 px-2 lg:flex-row lg:items-center lg:justify-center lg:gap-0">
       <div
         className={cn("flex-1 text-sm text-muted-foreground", {
           "select-none opacity-0": !checkCollection({
@@ -56,13 +56,13 @@ export function DataTablePagination<TData>({
         })}
       >
         {table.getFilteredSelectedRowModel().rows.length} of{" "}
-        {table.getFilteredRowModel().rows.length} row (s) selected.
+        {table.getFilteredRowModel().rows.length} row(s) selected.
         <br />
-        Total row (s): {maxRows}
+        Total row(s): {maxRows}
       </div>
-      <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-2">
-          <p className="text-sm font-medium">Rows per page</p>
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between sm:gap-8">
+        <div className="flex items-center justify-between gap-2 lg:justify-normal">
+          <p className="min-w-28 text-sm font-medium">Rows per page</p>
           <Select
             value={
               searchParams.get("pageSize") ??
@@ -96,14 +96,14 @@ export function DataTablePagination<TData>({
             </SelectContent>
           </Select>
         </div>
-        <div className="flex items-center space-x-5 lg:space-x-8">
-          <div className="flex w-[100px] items-center justify-center text-sm font-medium">
+        <div className="flex items-center justify-between gap-2 lg:justify-normal">
+          <div className="flex items-center justify-center text-sm font-medium sm:min-w-28">
             Page {currentPage} of {maxPages}
           </div>
-          <div className="flex items-center space-x-2">
+          <div className="flex items-center gap-2">
             <Button
               variant="outline"
-              className="hidden h-8 w-8 p-0 sm:flex"
+              className="hidden h-8 w-8 p-0 lg:flex"
               onClick={() => {
                 router.push(pathname + "?" + createQueryString("page", "1"));
 
@@ -148,7 +148,7 @@ export function DataTablePagination<TData>({
             </Button>
             <Button
               variant="outline"
-              className="hidden h-8 w-8 p-0 sm:flex"
+              className="hidden h-8 w-8 p-0 lg:flex"
               onClick={() => {
                 router.push(
                   pathname + "?" + createQueryString("page", String(maxPages)),

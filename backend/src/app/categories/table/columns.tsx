@@ -11,6 +11,7 @@ import {
   ActionsHeader,
 } from "../../../components/admin/table/actionColumn";
 import { type z } from "zod";
+import { cn } from "@/lib/utils";
 
 export const columns: ColumnDef<z.infer<typeof selectCategory>>[] = [
   {
@@ -36,16 +37,28 @@ export const columns: ColumnDef<z.infer<typeof selectCategory>>[] = [
   { accessorKey: "id", header: "ID", enableHiding: false },
   {
     accessorKey: "name",
-    header: "Name",
+    header: () => {
+      return <div className="line-clamp-1 truncate">Name</div>;
+    },
     cell: ({ row }) => {
-      return <div>{slugToLabel(row.getValue("name"))}</div>;
+      return (
+        <div className={cn("line-clamp-1")}>
+          {slugToLabel(row.getValue("name"))}
+        </div>
+      );
     },
   },
   {
     accessorKey: "visibility",
-    header: "Visibility",
+    header: () => {
+      return <div className="line-clamp-1 truncate">Visibility</div>;
+    },
     cell: ({ row }) => {
-      return <div>{slugToLabel(row.getValue("visibility"))}</div>;
+      return (
+        <div className="line-clamp-1 truncate">
+          {slugToLabel(row.getValue("visibility"))}
+        </div>
+      );
     },
   },
   {
@@ -53,7 +66,7 @@ export const columns: ColumnDef<z.infer<typeof selectCategory>>[] = [
     header: ({ column }) => {
       return (
         <div
-          className="flex cursor-pointer select-none items-center gap-2"
+          className="line-clamp-1 flex cursor-pointer select-none items-center gap-2 truncate"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
           Updated At
@@ -67,7 +80,11 @@ export const columns: ColumnDef<z.infer<typeof selectCategory>>[] = [
         timeStyle: "short",
       });
 
-      return <div>{f.format(row.getValue("updatedAt"))}</div>;
+      return (
+        <div className="line-clamp-1 truncate">
+          {f.format(row.getValue("updatedAt"))}
+        </div>
+      );
     },
   },
   {

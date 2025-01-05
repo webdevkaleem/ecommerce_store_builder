@@ -86,7 +86,7 @@ export function DataTable<TData, TValue>({
   // Render
   return (
     <>
-      <div className="flex items-center gap-4">
+      <div className="flex flex-col items-center gap-4 sm:flex-row">
         {/* Filtering */}
         <Input
           placeholder="Search by name ..."
@@ -99,7 +99,7 @@ export function DataTable<TData, TValue>({
         {/* View Columns Selector */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button className="ml-auto">Select Columns</Button>
+            <Button className="ml-auto w-full sm:w-fit">Select Columns</Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-40">
             {table

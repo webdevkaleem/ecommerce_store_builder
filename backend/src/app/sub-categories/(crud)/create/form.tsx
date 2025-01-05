@@ -2,7 +2,7 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Edit, X } from "lucide-react";
+import { Edit, Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
@@ -263,7 +263,7 @@ export default function CreateForm({
                 <FormLabel>Category</FormLabel>
                 <FormControl>
                   <Sheet {...field} open={show} onOpenChange={toggleShow}>
-                    <div className="flex justify-between gap-4">
+                    <div className="flex flex-col justify-between gap-4 sm:flex-row">
                       <SheetTrigger asChild>
                         <div className="flex w-full justify-between gap-4">
                           <Button
@@ -289,7 +289,7 @@ export default function CreateForm({
                         type="button"
                         onClick={resetCreateSubCategory}
                       >
-                        <X />
+                        <Trash2 />
                       </Button>
                     </div>
                     <SheetContent className="sm:max-w-4xl">
