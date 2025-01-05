@@ -2,7 +2,6 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Edit, Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
@@ -12,9 +11,7 @@ import { type z } from "zod";
 
 // Local Imports
 
-import CategoriesTable from "@/app/categories/table";
 import TopButtons from "@/components/admin/form/top-buttons";
-import { Button } from "@/components/ui/button";
 import {
   Form,
   FormControl,
@@ -33,14 +30,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
-import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "@/components/ui/sheet";
 import { slugToLabel } from "@/lib/helper-functions";
 import {
   insertSubCategory,
@@ -50,6 +39,7 @@ import {
 } from "@/server/db/schema";
 import { useCreateSubCategoryStore } from "@/store/admin/create-sub-category";
 import { api } from "@/trpc/react";
+import SelectCategory from "../select-category";
 
 // Body
 export default function CreateForm({
@@ -255,7 +245,7 @@ export default function CreateForm({
               );
             }}
           />
-          <FormField
+          {/* <FormField
             control={form.control}
             name="categoryId"
             render={({ field }) => (
@@ -320,6 +310,32 @@ export default function CreateForm({
                       </SheetHeader>
                     </SheetContent>
                   </Sheet>
+                </FormControl>
+                <FormDescription>
+                  This is the category which the sub category will be
+                  associated.
+                </FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          /> */}
+
+          <FormField
+            control={form.control}
+            name="categoryId"
+            render={() => (
+              <FormItem className="flex flex-col">
+                <FormLabel>Category</FormLabel>
+                <FormControl>
+                  <SelectCategory
+                    allCategories={allCategories}
+                    maxPages={maxPages}
+                    maxRows={maxRows}
+                    show={show}
+                    toggleShow={toggleShow}
+                    resetCreateSubCategory={resetCreateSubCategory}
+                    label={label}
+                  />
                 </FormControl>
                 <FormDescription>
                   This is the category which the sub category will be
