@@ -29,6 +29,7 @@ import {
   ChevronUp,
   CircleUserRound,
   Container,
+  Images,
   LayoutDashboard,
   SatelliteDish,
 } from "lucide-react";
@@ -94,8 +95,9 @@ const sideNavs: {
       },
       {
         id: "3",
-        label: "Products",
-        href: "/products",
+        label: "Media",
+        href: "/media",
+        icon: <Images />,
       },
     ],
   },

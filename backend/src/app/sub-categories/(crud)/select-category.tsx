@@ -1,3 +1,5 @@
+"use client";
+
 import CategoriesTable from "@/app/categories/table";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
@@ -9,6 +11,7 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
+import { useIsMobile } from "@/hooks/use-mobile";
 import { type selectCategory } from "@/server/db/schema";
 import { Edit, Trash2 } from "lucide-react";
 import { type z } from "zod";
@@ -30,6 +33,8 @@ export default function SelectCategory({
   resetCreateSubCategory: () => void;
   label: string;
 }) {
+  const isMobile = useIsMobile();
+
   return (
     <Sheet open={show} onOpenChange={toggleShow}>
       <div className="flex flex-col justify-between gap-4 sm:flex-row">
@@ -51,6 +56,7 @@ export default function SelectCategory({
           onClick={resetCreateSubCategory}
         >
           <Trash2 />
+          {isMobile && <span>Remove</span>}
         </Button>
       </div>
       <SheetContent className="w-screen sm:max-w-4xl">
