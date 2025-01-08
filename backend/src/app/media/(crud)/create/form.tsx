@@ -3,7 +3,7 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import { useForm } from "react-hook-form";
 import { useHotkeys } from "react-hotkeys-hook";
 import { toast } from "sonner";
@@ -23,11 +23,13 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
-import { categoryNameSchema, selectVisibilityEnum } from "@/server/db/schema";
+import { categoryNameSchema } from "@/server/db/schema";
 import { api } from "@/trpc/react";
+import Upload from "./upload";
 
 const MediaType = z.object({
   name: z.string(),
+  images: z.string().array(),
 });
 
 // Body
@@ -118,7 +120,7 @@ export default function CreateForm() {
         <form
           onSubmit={form.handleSubmit(onSubmit)}
           onReset={onReset}
-          className="flex flex-col gap-8"
+          className="flex h-full flex-col gap-8"
           ref={formRef}
         >
           {/* Hero Section */}
@@ -137,6 +139,23 @@ export default function CreateForm() {
                 </FormControl>
                 <FormDescription>
                   This is the public display name for the media.
+                </FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="images"
+            render={() => (
+              <FormItem>
+                <FormLabel>Images</FormLabel>
+                <FormControl>
+                  <Upload />
+                </FormControl>
+                <FormDescription>
+                  These are the public display media.
                 </FormDescription>
                 <FormMessage />
               </FormItem>

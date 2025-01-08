@@ -1,9 +1,11 @@
-import { type Config } from "tailwindcss";
+/* eslint-disable @typescript-eslint/no-require-imports */
 import { fontFamily } from "tailwindcss/defaultTheme";
 
-export default {
+import { withUt } from "uploadthing/tw";
+
+export default withUt({
   darkMode: ["class"],
-  content: ["./src/**/*.tsx"],
+  content: ["./src/**/*.{ts,tsx,mdx}"],
   theme: {
     extend: {
       fontFamily: {
@@ -75,4 +77,4 @@ export default {
     require("tailwindcss-animate"),
     require("tailwindcss-debug-screens"),
   ],
-} satisfies Config;
+});

@@ -10,7 +10,7 @@ export default function MainLayout({
   return (
     <main
       className={cn(
-        "relative mx-auto min-h-10 w-full max-w-screen-2xl px-6 py-4",
+        "relative mx-auto min-h-screen w-full max-w-screen-2xl px-6 py-4",
         className,
       )}
     >

@@ -4,11 +4,13 @@ import { createCallerFactory, createTRPCRouter } from "@/server/api/trpc";
 // Local Imports
 import { categoryRouter } from "@/server/api/routers/category";
 import { subCategoryRouter } from "@/server/api/routers/subCategory";
+import { mediaRouter } from "./routers/media";
 
 // Body
 export const appRouter = createTRPCRouter({
   category: categoryRouter,
   subCategory: subCategoryRouter,
+  media: mediaRouter,
 });
 
 // export type definition of API
