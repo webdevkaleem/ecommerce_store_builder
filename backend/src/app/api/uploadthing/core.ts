@@ -1,6 +1,7 @@
 import { labelToSlug } from "@/lib/helper-functions";
+import { utapi } from "@/server/uploadthing";
 import { createUploadthing, type FileRouter } from "uploadthing/next";
-import { UploadThingError, UTFiles } from "uploadthing/server";
+import { UploadThingError, UTFile, UTFiles } from "uploadthing/server";
 import { z } from "zod";
 
 const f = createUploadthing();
@@ -25,7 +26,6 @@ export const ourFileRouter = {
       },
     },
   })
-    .input(z.object({ name: z.string() }))
     // Set permissions and file types for this FileRoute
     .middleware(async ({ req, files, input }) => {
       // This code runs on your server before upload
@@ -36,14 +36,14 @@ export const ourFileRouter = {
 
       // Whatever is returned here is accessible in onUploadComplete as `metadata`
       const fileOverrides = files.map((file) => {
-        const slugifyName = labelToSlug(input.name);
+        const slugifyName = labelToSlug(file.name);
         return { ...file, name: slugifyName };
       });
 
       // Return userId to be used in onUploadComplete
       return { userId: user.id, [UTFiles]: fileOverrides };
     })
-    .onUploadComplete(async ({ metadata, file }) => {
+    .onUploadComplete(async ({ metadata, file, req }) => {
       // This code RUNS ON YOUR SERVER after upload
       console.log("Upload complete for userId:", metadata.userId);
 

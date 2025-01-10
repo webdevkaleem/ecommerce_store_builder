@@ -7,21 +7,39 @@ import Image from "next/image";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
 import { buttonVariants } from "@/components/ui/button";
 import { UploadButton } from "@/lib/uploadthing";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { api } from "@/trpc/react";
 import * as motion from "motion/react-client";
+import { useCreateMediaStore } from "@/store/admin/create-media";
+import { labelToSlug } from "@/lib/helper-functions";
 
 // Body
 
-export default function Upload() {
+export default function Upload({
+  setFormName,
+  setFormImage,
+  setFormMediaKey,
+}: {
+  setFormName: (name: string) => void;
+  setFormImage: (image: string) => void;
+  setFormMediaKey: (key: string) => void;
+}) {
   // State management
   const [imageUrl, setImageUrl] = useState<string | undefined>(undefined);
   const [imageKey, setImageKey] = useState<string | undefined>(undefined);
-  const ref = useRef(null);
+
+  const [showAnimation, setShowAnimation] = useState(false);
 
   // Derived Functions
   const { mutate } = api.media.deleteByKey.useMutation();
+
+  // Whenever the imageUrl & imageKey becomes undefined, we set the animation to false
+  useEffect(() => {
+    if (!imageUrl && !imageKey) {
+      setShowAnimation(false);
+    }
+  }, [imageUrl, imageKey]);
 
   return (
     <div className="flex flex-col gap-4">
@@ -29,12 +47,18 @@ export default function Upload() {
       <div className="flex justify-between">
         <div className="flex w-full items-center gap-4">
           <UploadButton
-            input={{ name: "Image" }}
             endpoint="imageUploader"
             onClientUploadComplete={(res) => {
-              // Do something with the response
-              setImageUrl(res[0]?.url);
-              setImageKey(res[0]?.key);
+              // An images was uploaded successfully
+              if (res[0]) {
+                setImageUrl(res[0].url);
+                setImageKey(res[0].key);
+
+                // Set the values inside the form
+                setFormName(res[0].name.split(".")[0] ?? "");
+                setFormImage(res[0].url ?? "");
+                setFormMediaKey(res[0].key ?? "");
+              }
             }}
             onUploadError={(error: Error) => {
               // Do something with the error.
@@ -46,6 +70,11 @@ export default function Upload() {
                 mutate({ key: imageKey });
                 setImageUrl(undefined);
                 setImageKey(undefined);
+
+                // Reset the values inside the form
+                setFormName("");
+                setFormImage("");
+                setFormMediaKey("");
               }
 
               return files;
@@ -59,8 +88,6 @@ export default function Upload() {
             }}
           />
         </div>
-
-        <div className=""></div>
       </div>
 
       {/* Images */}
@@ -69,40 +96,25 @@ export default function Upload() {
         <motion.div
           layout
           initial={{ opacity: 0 }}
-          animate={ref.current ? { opacity: 1 } : { opacity: 0 }}
+          animate={showAnimation ? { opacity: 1 } : { opacity: 0 }}
           transition={{
             duration: 0.25,
           }}
-          ref={ref}
         >
-          <div className="flex min-h-full w-full gap-4">
+          <div className="flex min-h-full w-full">
             {/* Main */}
-            <div className="w-2/3">
-              <AspectRatio ratio={1 / 1} className="w-full">
-                <Image
-                  src={imageUrl}
-                  width={1080}
-                  height={1080}
-                  className="rounded-md object-cover"
-                  alt="Demo image"
-                />
-              </AspectRatio>
-            </div>
+            <AspectRatio ratio={1 / 1} className="w-3/5">
+              <Image
+                src={imageUrl}
+                width={1080}
+                height={1080}
+                className="rounded-md object-cover"
+                alt="Demo image"
+                onLoadingComplete={() => setShowAnimation(true)}
+              />
+            </AspectRatio>
 
-            {/* Other */}
-            <div className="flex w-1/3 gap-4 transition-all duration-1000">
-              <div className="w-full">
-                <AspectRatio ratio={1 / 1} className="w-full">
-                  <Image
-                    src={imageUrl}
-                    width={1080}
-                    height={1080}
-                    className="rounded-md object-cover"
-                    alt="Demo image"
-                  />
-                </AspectRatio>
-              </div>
-            </div>
+            {/* Meta Data */}
           </div>
         </motion.div>
       )}

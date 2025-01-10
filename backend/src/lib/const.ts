@@ -1,4 +1,4 @@
 export type CollectionsType = {
-  singular: "Category" | "Sub Category";
-  plural: "Categories" | "Sub Categories";
+  singular: "Category" | "Sub Category" | "Media";
+  plural: "Categories" | "Sub Categories" | "Media";
 };

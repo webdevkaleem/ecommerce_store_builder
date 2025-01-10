@@ -83,4 +83,30 @@ export const mediaRouter = createTRPCRouter({
         };
       }
     }),
+
+  rename: publicProcedure
+    .input(z.object({ name: z.string(), key: z.string() }))
+    .mutation(async ({ input }) => {
+      try {
+        await utapi.renameFiles({
+          fileKey: input.key,
+          newName: labelToSlug(input.name),
+        });
+
+        revalidatePath("/media");
+
+        return {
+          status: "success",
+          message: `Renamed media to "${labelToSlug(input.name)}" in the database`,
+        };
+      } catch (error) {
+        return {
+          status: "fail",
+          message:
+            error instanceof Error
+              ? CategoryMessageBuilder(error.message)
+              : "Something went wrong",
+        };
+      }
+    }),
 });

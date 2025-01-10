@@ -23,56 +23,54 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
-import { categoryNameSchema } from "@/server/db/schema";
 import { api } from "@/trpc/react";
 import Upload from "./upload";
+import { useCreateMediaStore } from "@/store/admin/create-media";
+import { labelToSlug } from "@/lib/helper-functions";
+import { type CollectionsType } from "@/lib/const";
 
-const MediaType = z.object({
-  name: z.string(),
-  images: z.string().array(),
+export const MediaType = z.object({
+  name: z.string().min(1),
+  image: z.string().min(1),
+  key: z.string().min(1),
 });
 
 // Body
-export default function CreateForm() {
+export default function CreateForm({
+  collection,
+}: {
+  collection: CollectionsType;
+}) {
   // State management
   const router = useRouter();
   const formRef = useRef(null);
+  const { name, setName, resetMedia } = useCreateMediaStore();
 
   // Derived Functions
   const { mutate, isPending, isSuccess, data, reset } =
-    api.category.create.useMutation();
+    api.media.rename.useMutation();
 
   // Initialize Form
   const form = useForm<z.infer<typeof MediaType>>({
     resolver: zodResolver(MediaType),
     defaultValues: {
       name: "",
+      key: "",
+      image: "",
     },
   });
 
   // Helper Functions
   function onSubmit(values: z.infer<typeof MediaType>) {
-    // 1. Special Checks
-    // This checks if the name is valid. This is required as drizzle won't check for stuff like min characters
-    const categoryName = categoryNameSchema.safeParse(values.name);
-
-    // If the name is invalid then we show an error message on the form and return
-    if (categoryName.error) {
-      const errorMessage = categoryName.error.format();
-      form.setError("name", { message: errorMessage._errors.join(". ") });
-      return;
-    }
-
-    // 2. Submit
-    mutate({ name: values.name, visibility: "private" });
+    mutate({ name: values.name, key: values.key });
   }
 
   function onReset() {
     // Show toast, redirect and reset state
     toast.info("Discarded your changes");
 
-    // Redirect to categories page
-    router.push("/categories");
+    // Redirect to main page
+    router.push(labelToSlug(collection.plural));
 
     // Reset state
     reset();
@@ -85,6 +83,23 @@ export default function CreateForm() {
       await form.handleSubmit(onSubmit)();
     }
   }
+
+  function setFormName(name: string) {
+    form.setValue("name", labelToSlug(name));
+
+    // Setting to the state
+    setName(labelToSlug(name));
+  }
+
+  function setFormMediaKey(key: string) {
+    form.setValue("key", key);
+  }
+
+  function setFormImage(image: string) {
+    form.setValue("image", image);
+  }
+
+  console.log(form.getValues());
 
   // Hotkeys
   // eslint-disable-next-line @typescript-eslint/no-misused-promises
@@ -101,8 +116,8 @@ export default function CreateForm() {
       if (data.status === "success") {
         toast.success(data.message);
 
-        // Redirect to categories page
-        router.push("/categories");
+        // Redirect to main page
+        router.push(labelToSlug(collection.plural));
 
         // Reset state
         reset();
@@ -147,12 +162,16 @@ export default function CreateForm() {
 
           <FormField
             control={form.control}
-            name="images"
+            name="image"
             render={() => (
               <FormItem>
                 <FormLabel>Images</FormLabel>
                 <FormControl>
-                  <Upload />
+                  <Upload
+                    setFormName={setFormName}
+                    setFormImage={setFormImage}
+                    setFormMediaKey={setFormMediaKey}
+                  />
                 </FormControl>
                 <FormDescription>
                   These are the public display media.
