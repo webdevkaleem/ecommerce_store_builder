@@ -26,20 +26,20 @@ export default function Upload({
   setFormMediaKey: (key: string) => void;
 }) {
   // State management
-  const [imageUrl, setImageUrl] = useState<string | undefined>(undefined);
-  const [imageKey, setImageKey] = useState<string | undefined>(undefined);
-
   const [showAnimation, setShowAnimation] = useState(false);
+  const { images, pushImages, resetMedia } = useCreateMediaStore();
 
   // Derived Functions
   const { mutate } = api.media.deleteByKey.useMutation();
 
   // Whenever the imageUrl & imageKey becomes undefined, we set the animation to false
   useEffect(() => {
-    if (!imageUrl && !imageKey) {
+    if (images.length === 0) {
       setShowAnimation(false);
     }
-  }, [imageUrl, imageKey]);
+  }, [images]);
+
+  console.log(images, showAnimation);
 
   return (
     <div className="flex flex-col gap-4">
@@ -49,10 +49,16 @@ export default function Upload({
           <UploadButton
             endpoint="imageUploader"
             onClientUploadComplete={(res) => {
-              // An images was uploaded successfully
+              // The main image was uploaded successfully
+              console.log("RES", res);
               if (res[0]) {
-                setImageUrl(res[0].url);
-                setImageKey(res[0].key);
+                // Add it to the store
+                pushImages(
+                  res.map((resImage) => ({
+                    key: resImage.key,
+                    url: resImage.url,
+                  })),
+                );
 
                 // Set the values inside the form
                 setFormName(res[0].name.split(".")[0] ?? "");
@@ -66,10 +72,9 @@ export default function Upload({
             }}
             // Remove the image which is stored in state if the button is clicked again first
             onBeforeUploadBegin={async (files) => {
-              if (imageUrl && imageKey) {
-                mutate({ key: imageKey });
-                setImageUrl(undefined);
-                setImageKey(undefined);
+              if (images.length > 0 && images[0]) {
+                mutate({ key: images[0].key });
+                resetMedia();
 
                 // Reset the values inside the form
                 setFormName("");
@@ -92,7 +97,7 @@ export default function Upload({
 
       {/* Images */}
 
-      {imageUrl && (
+      {images.length > 0 && images[0] && (
         <motion.div
           layout
           initial={{ opacity: 0 }}
@@ -105,7 +110,7 @@ export default function Upload({
             {/* Main */}
             <AspectRatio ratio={1 / 1} className="w-3/5">
               <Image
-                src={imageUrl}
+                src={images[0].url}
                 width={1080}
                 height={1080}
                 className="rounded-md object-cover"
@@ -114,7 +119,26 @@ export default function Upload({
               />
             </AspectRatio>
 
-            {/* Meta Data */}
+            {/* Other */}
+            <div className="flex flex-col gap-4">
+              {images.map((imageObj) => {
+                return (
+                  <AspectRatio
+                    key={imageObj.key}
+                    ratio={1 / 1}
+                    className="w-full"
+                  >
+                    <Image
+                      src={imageObj.url}
+                      width={400}
+                      height={400}
+                      className="rounded-md object-cover"
+                      alt="Demo image"
+                    />
+                  </AspectRatio>
+                );
+              })}
+            </div>
           </div>
         </motion.div>
       )}

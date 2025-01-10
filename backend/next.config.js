@@ -10,8 +10,7 @@ const config = {
         remotePatterns: [
             {
               protocol: "https",
-              hostname: "utfs.io",
-              // pathname: "/a/1kxg2psu3c/*",
+              hostname: "1kxg2psu3c.ufs.sh",
             },
           ],
     }

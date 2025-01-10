@@ -2,7 +2,10 @@ import { labelToSlug } from "@/lib/helper-functions";
 import { utapi } from "@/server/uploadthing";
 import { createUploadthing, type FileRouter } from "uploadthing/next";
 import { UploadThingError, UTFile, UTFiles } from "uploadthing/server";
+
 import { z } from "zod";
+
+import sharp from "sharp";
 
 const f = createUploadthing();
 
@@ -40,17 +43,69 @@ export const ourFileRouter = {
         return { ...file, name: slugifyName };
       });
 
+      const emptyImages: { key: string; url: string }[] = [];
+
       // Return userId to be used in onUploadComplete
-      return { userId: user.id, [UTFiles]: fileOverrides };
+      return {
+        userId: user.id,
+        [UTFiles]: fileOverrides,
+        images: emptyImages,
+      };
     })
-    .onUploadComplete(async ({ metadata, file, req }) => {
-      // This code RUNS ON YOUR SERVER after upload
-      console.log("Upload complete for userId:", metadata.userId);
+    .onUploadComplete(async ({ metadata, file }) => {
+      const commonFileName = file.name.split(".")[0];
+      const commonFileType = file.name.split(".")[1];
 
-      console.log("file url", file.url);
+      // 1. Fetch the original image which is uploaded
+      const responseImage = await fetch(file.url);
 
-      // !!! Whatever is returned here is sent to the clientside `onClientUploadComplete` callback
-      return { uploadedBy: metadata.userId };
+      // 2. Error check
+      if (!responseImage.ok) new UploadThingError("Failed to fetch image");
+
+      // 3. Create a buffer of the original image
+      const bufferImage = await responseImage.arrayBuffer();
+
+      // 4. Make mobile & tablet resized buffers using sharp
+      const mobileBuffer = await sharp(bufferImage).resize(400, 400).toBuffer();
+      const tabletBuffer = await sharp(bufferImage).resize(600, 600).toBuffer();
+
+      // 5. Create uploadthing files using the buffers
+      const mobileImage = new UTFile(
+        [mobileBuffer],
+        `${commonFileName}/mobile.${commonFileType}`,
+      );
+      const tabletImage = new UTFile(
+        [tabletBuffer],
+        `${commonFileName}/tablet.${commonFileType}`,
+      );
+
+      // 6. Upload the files
+      const savedImages = await utapi.uploadFiles([mobileImage, tabletImage]);
+
+      // 7. ::Check:: If the images were uploaded successfully
+      if (!savedImages[0]?.data) {
+        new UploadThingError("Failed to fetch image");
+      }
+
+      // 8. Create an array of the images with the fields that are to be used in the frontend
+      const imagesArr: {
+        key: string;
+        url: string;
+      }[] = savedImages
+        .map((obj) => {
+          if (obj.data) {
+            return {
+              key: obj.data.key,
+              url: obj.data.url,
+            };
+          }
+        })
+        .filter((obj) => obj !== undefined);
+
+      // 9. Return data to the frontend
+      return {
+        metadata: { uploadedBy: metadata.userId, images: [...imagesArr] },
+      };
     }),
 } satisfies FileRouter;
 

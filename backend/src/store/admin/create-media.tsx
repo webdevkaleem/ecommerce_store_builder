@@ -1,20 +1,27 @@
 import { create } from "zustand";
 
 interface CreateMedia {
-  name: string;
-  setName: (name: string) => void;
+  key: string;
+  images: { key: string; url: string }[];
+  setName: (key: string) => void;
+  pushImages: (image: { key: string; url: string }[]) => void;
   resetMedia: () => void;
 }
 
 const initialState = {
-  name: "",
+  key: "",
+  images: [],
 };
 
 export const useCreateMediaStore = create<CreateMedia>()((set) => ({
   ...initialState,
-  setName: (name) =>
+  setName: (key) =>
     set(() => {
-      return { name };
+      return { key };
+    }),
+  pushImages: (images) =>
+    set((before) => {
+      return { images: before.images.concat(images) };
     }),
   resetMedia: () => set(() => ({ ...initialState })),
 }));
