@@ -99,8 +99,6 @@ export default function CreateForm({
     form.setValue("image", image);
   }
 
-  console.log(form.getValues());
-
   // Hotkeys
   // eslint-disable-next-line @typescript-eslint/no-misused-promises
   useHotkeys("ctrl+enter", () => onSubmitShortcut(), {

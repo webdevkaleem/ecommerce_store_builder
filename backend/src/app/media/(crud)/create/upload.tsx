@@ -13,6 +13,7 @@ import { api } from "@/trpc/react";
 import * as motion from "motion/react-client";
 import { useCreateMediaStore } from "@/store/admin/create-media";
 import { labelToSlug } from "@/lib/helper-functions";
+import { Badge } from "@/components/ui/badge";
 
 // Body
 
@@ -39,7 +40,7 @@ export default function Upload({
     }
   }, [images]);
 
-  console.log(images, showAnimation);
+  console.log(images.slice(1));
 
   return (
     <div className="flex flex-col gap-4">
@@ -50,15 +51,22 @@ export default function Upload({
             endpoint="imageUploader"
             onClientUploadComplete={(res) => {
               // The main image was uploaded successfully
-              console.log("RES", res);
               if (res[0]) {
-                // Add it to the store
-                pushImages(
-                  res.map((resImage) => ({
-                    key: resImage.key,
-                    url: resImage.url,
-                  })),
-                );
+                const serverDataArr = res.map((resImage) => {
+                  const serverData = resImage.serverData as {
+                    uploadedBy: string;
+                    images: {
+                      key: string;
+                      url: string;
+                    }[];
+                  };
+
+                  return serverData.images;
+                });
+
+                // Add them to the store
+                console.log("FROM SERVER", serverDataArr.flat(2));
+                pushImages(serverDataArr.flat(2));
 
                 // Set the values inside the form
                 setFormName(res[0].name.split(".")[0] ?? "");
@@ -106,36 +114,54 @@ export default function Upload({
             duration: 0.25,
           }}
         >
-          <div className="flex min-h-full w-full">
+          <div className="flex min-w-full flex-col gap-4 xl:flex-row">
             {/* Main */}
-            <AspectRatio ratio={1 / 1} className="w-3/5">
-              <Image
-                src={images[0].url}
-                width={1080}
-                height={1080}
-                className="rounded-md object-cover"
-                alt="Demo image"
-                onLoadingComplete={() => setShowAnimation(true)}
-              />
-            </AspectRatio>
+            <div className="relative w-full bg-red-100 xl:w-4/5">
+              <AspectRatio ratio={1 / 1} className="w-full">
+                <picture>
+                  <img
+                    src={images[0].url}
+                    className="h-full w-full rounded-md object-cover"
+                    alt="Demo image"
+                    onLoad={() => setShowAnimation(true)}
+                  />
+                </picture>
+
+                <Badge
+                  variant={"secondary"}
+                  className="absolute bottom-5 right-5"
+                >
+                  Original Photo
+                </Badge>
+              </AspectRatio>
+            </div>
 
             {/* Other */}
-            <div className="flex flex-col gap-4">
-              {images.map((imageObj) => {
+            <div className="flex:row flex w-full gap-4 bg-blue-100 xl:w-1/5 xl:flex-col">
+              {/* Render all images except the first one (the original) */}
+              {images.slice(1).map((imageObj, i) => {
                 return (
-                  <AspectRatio
-                    key={imageObj.key}
-                    ratio={1 / 1}
-                    className="w-full"
-                  >
-                    <Image
-                      src={imageObj.url}
-                      width={400}
-                      height={400}
-                      className="rounded-md object-cover"
-                      alt="Demo image"
-                    />
-                  </AspectRatio>
+                  <div className="relative w-full" key={imageObj.key}>
+                    <AspectRatio ratio={1 / 1} className="w-full">
+                      <picture>
+                        <img
+                          src={imageObj.url}
+                          width={1080}
+                          height={1080}
+                          className="rounded-md object-cover"
+                          alt="Demo image"
+                        />
+                      </picture>
+                    </AspectRatio>
+
+                    <Badge
+                      variant={"secondary"}
+                      className="absolute bottom-5 right-5"
+                    >
+                      {i === 0 && "Mobile Photo"}
+                      {i === 1 && "Tablet Photo"}
+                    </Badge>
+                  </div>
                 );
               })}
             </div>

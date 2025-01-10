@@ -91,20 +91,23 @@ export const ourFileRouter = {
       const imagesArr: {
         key: string;
         url: string;
-      }[] = savedImages
-        .map((obj) => {
-          if (obj.data) {
-            return {
-              key: obj.data.key,
-              url: obj.data.url,
-            };
-          }
-        })
-        .filter((obj) => obj !== undefined);
+      }[] = [{ key: file.key, url: file.url }].concat(
+        savedImages
+          .map((obj) => {
+            if (obj.data) {
+              return {
+                key: obj.data.key,
+                url: obj.data.url,
+              };
+            }
+          })
+          .filter((obj) => obj !== undefined),
+      );
 
       // 9. Return data to the frontend
       return {
-        metadata: { uploadedBy: metadata.userId, images: [...imagesArr] },
+        uploadedBy: metadata.userId,
+        images: imagesArr,
       };
     }),
 } satisfies FileRouter;
