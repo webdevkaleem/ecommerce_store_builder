@@ -1,15 +1,14 @@
-import { labelToSlug } from "@/lib/helper-functions";
 import { utapi } from "@/server/uploadthing";
 import { createUploadthing, type FileRouter } from "uploadthing/next";
 import { UploadThingError, UTFile, UTFiles } from "uploadthing/server";
 
-import { z } from "zod";
-
+import { createId } from "@paralleldrive/cuid2";
 import sharp from "sharp";
 
 const f = createUploadthing();
 
-const auth = (req: Request) => ({ id: "fakeId" }); // Fake auth function
+const auth = () => ({ id: "fakeId" }); // Fake auth function
+// const auth = (req: Request) => ({ id: "fakeId" }); // Fake auth function
 
 // FileRouter for your app, can contain multiple FileRoutes
 export const ourFileRouter = {
@@ -30,17 +29,17 @@ export const ourFileRouter = {
     },
   })
     // Set permissions and file types for this FileRoute
-    .middleware(async ({ req, files, input }) => {
+    .middleware(async ({ files }) => {
       // This code runs on your server before upload
-      const user = auth(req);
+      const user = auth();
 
       // If you throw, the user will not be able to upload
       if (!user) new UploadThingError("UNAUTHORIZED");
 
       // Whatever is returned here is accessible in onUploadComplete as `metadata`
       const fileOverrides = files.map((file) => {
-        const slugifyName = labelToSlug(file.name);
-        return { ...file, name: slugifyName };
+        const randomName = createId();
+        return { ...file, name: randomName };
       });
 
       const emptyImages: { key: string; url: string }[] = [];
@@ -53,8 +52,8 @@ export const ourFileRouter = {
       };
     })
     .onUploadComplete(async ({ metadata, file }) => {
-      const commonFileName = file.name.split(".")[0];
-      const commonFileType = file.name.split(".")[1];
+      const commonFileName = file.name.split(`.${file.type}`)[0];
+      const commonFileType = file.type;
 
       // 1. Fetch the original image which is uploaded
       const responseImage = await fetch(file.url);
@@ -72,11 +71,15 @@ export const ourFileRouter = {
       // 5. Create uploadthing files using the buffers
       const mobileImage = new UTFile(
         [mobileBuffer],
-        `${commonFileName}/mobile.${commonFileType}`,
+        `${commonFileName}/mobile`,
+        {
+          type: commonFileType,
+        },
       );
       const tabletImage = new UTFile(
         [tabletBuffer],
-        `${commonFileName}/tablet.${commonFileType}`,
+        `${commonFileName}/tablet`,
+        { type: commonFileType },
       );
 
       // 6. Upload the files
@@ -88,17 +91,26 @@ export const ourFileRouter = {
       }
 
       // 8. Create an array of the images with the fields that are to be used in the frontend
-      const imagesArr: {
-        key: string;
-        url: string;
-      }[] = [{ key: file.key, url: file.url }].concat(
+      // It includes the original image and the resized images
+      const imagesArr = [
+        { key: file.key, url: file.url, label: "Original Photo" },
+      ].concat(
         savedImages
           .map((obj) => {
             if (obj.data) {
-              return {
-                key: obj.data.key,
-                url: obj.data.url,
-              };
+              if (obj.data.name.includes("mobile")) {
+                return {
+                  key: obj.data.key,
+                  url: obj.data.url,
+                  label: "Mobile Photo",
+                };
+              } else if (obj.data.name.includes("tablet")) {
+                return {
+                  key: obj.data.key,
+                  url: obj.data.url,
+                  label: "Tablet Photo",
+                };
+              }
             }
           })
           .filter((obj) => obj !== undefined),

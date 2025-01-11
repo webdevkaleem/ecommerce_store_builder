@@ -23,16 +23,15 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
+import { type CollectionsType } from "@/lib/const";
+import { labelToSlug } from "@/lib/helper-functions";
+import { useCreateMediaStore } from "@/store/admin/create-media";
 import { api } from "@/trpc/react";
 import Upload from "./upload";
-import { useCreateMediaStore } from "@/store/admin/create-media";
-import { labelToSlug } from "@/lib/helper-functions";
-import { type CollectionsType } from "@/lib/const";
 
 export const MediaType = z.object({
-  name: z.string().min(1),
-  image: z.string().min(1),
-  key: z.string().min(1),
+  name: z.string().min(1, "Name is required"),
+  keys: z.string().min(1).array().min(1, "You must upload atleast 1 image"),
 });
 
 // Body
@@ -44,25 +43,24 @@ export default function CreateForm({
   // State management
   const router = useRouter();
   const formRef = useRef(null);
-  const { name, setName, resetMedia } = useCreateMediaStore();
+  const { setName, images } = useCreateMediaStore();
 
   // Derived Functions
   const { mutate, isPending, isSuccess, data, reset } =
-    api.media.rename.useMutation();
+    api.media.create.useMutation();
 
   // Initialize Form
   const form = useForm<z.infer<typeof MediaType>>({
     resolver: zodResolver(MediaType),
     defaultValues: {
       name: "",
-      key: "",
-      image: "",
+      keys: [],
     },
   });
 
   // Helper Functions
   function onSubmit(values: z.infer<typeof MediaType>) {
-    mutate({ name: values.name, key: values.key });
+    mutate({ name: values.name, keys: values.keys });
   }
 
   function onReset() {
@@ -91,14 +89,6 @@ export default function CreateForm({
     setName(labelToSlug(name));
   }
 
-  function setFormMediaKey(key: string) {
-    form.setValue("key", key);
-  }
-
-  function setFormImage(image: string) {
-    form.setValue("image", image);
-  }
-
   // Hotkeys
   // eslint-disable-next-line @typescript-eslint/no-misused-promises
   useHotkeys("ctrl+enter", () => onSubmitShortcut(), {
@@ -107,6 +97,14 @@ export default function CreateForm({
   });
 
   // Effects
+  // When the state of the images changes, we set the form value to the state
+  useEffect(() => {
+    form.setValue(
+      "keys",
+      images.map((imageObj) => imageObj.key),
+    );
+  }, [form, images]);
+
   useEffect(() => {
     // We check for both to be successful because of rerendering issues
     if (isSuccess && data) {
@@ -124,7 +122,7 @@ export default function CreateForm({
         toast.error(data.message);
       }
     }
-  }, [data, isSuccess, reset, router]);
+  }, [collection, data, isSuccess, reset, router]);
 
   // Render
   return (
@@ -160,16 +158,12 @@ export default function CreateForm({
 
           <FormField
             control={form.control}
-            name="image"
+            name="keys"
             render={() => (
               <FormItem>
                 <FormLabel>Images</FormLabel>
                 <FormControl>
-                  <Upload
-                    setFormName={setFormName}
-                    setFormImage={setFormImage}
-                    setFormMediaKey={setFormMediaKey}
-                  />
+                  <Upload setFormName={setFormName} />
                 </FormControl>
                 <FormDescription>
                   These are the public display media.

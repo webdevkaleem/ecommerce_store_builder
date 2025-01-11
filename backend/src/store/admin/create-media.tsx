@@ -1,10 +1,16 @@
 import { create } from "zustand";
 
+type ImageType = {
+  key: string;
+  url: string;
+  label: string;
+};
+
 interface CreateMedia {
   key: string;
-  images: { key: string; url: string }[];
+  images: ImageType[];
   setName: (key: string) => void;
-  pushImages: (image: { key: string; url: string }[]) => void;
+  pushImages: (images: ImageType[]) => void;
   resetMedia: () => void;
 }
 
@@ -20,8 +26,8 @@ export const useCreateMediaStore = create<CreateMedia>()((set) => ({
       return { key };
     }),
   pushImages: (images) =>
-    set((before) => {
-      return { images: before.images.concat(images) };
+    set((og) => {
+      return { images: og.images.concat(images) };
     }),
   resetMedia: () => set(() => ({ ...initialState })),
 }));

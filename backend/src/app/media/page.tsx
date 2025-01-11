@@ -1,26 +1,20 @@
-import { Button } from "@/components/ui/button";
-import { Separator } from "@/components/ui/separator";
-import { api } from "@/trpc/server";
-import { Plus } from "lucide-react";
-import Link from "next/link";
-import DeleteAllModel from "@/components/admin/models/category/delete-all";
-import DeleteByIdModel from "@/components/admin/models/category/delete-by-id";
-import { type SearchParamsType } from "@/lib/helper-functions";
-import { Suspense } from "react";
 import FadeIn from "@/components/admin/animations/fade-in";
 import Loader from "@/components/admin/animations/loader";
+import DeleteAllModel from "@/components/admin/models/category/delete-all";
+import DeleteByIdModel from "@/components/admin/models/category/delete-by-id";
+import { Button } from "@/components/ui/button";
+import { Separator } from "@/components/ui/separator";
 import { type CollectionsType } from "@/lib/const";
+import { Plus } from "lucide-react";
+import Link from "next/link";
+import { Suspense } from "react";
 
 const collection: CollectionsType = {
   singular: "Category",
   plural: "Categories",
 };
 
-export default function Page({
-  searchParams,
-}: {
-  searchParams: SearchParamsType;
-}) {
+export default function Page() {
   return (
     <>
       {/* Main Section */}
@@ -33,7 +27,7 @@ export default function Page({
         </FadeIn>
 
         <FadeIn>
-          <SearchTable searchParams={searchParams} />
+          <SearchTable />
         </FadeIn>
 
         {/* Models */}
@@ -62,11 +56,7 @@ function HeroSection() {
   );
 }
 
-async function SearchTable({
-  searchParams,
-}: {
-  searchParams: SearchParamsType;
-}) {
+async function SearchTable() {
   // const {
   //   page = "1",
   //   pageSize = "10",
