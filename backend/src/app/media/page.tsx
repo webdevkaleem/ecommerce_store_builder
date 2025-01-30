@@ -8,6 +8,7 @@ import { type CollectionsType } from "@/lib/const";
 import { Plus } from "lucide-react";
 import Link from "next/link";
 import { Suspense } from "react";
+import ImageFocus from "./(crud)/create/image-focus";
 
 const collection: CollectionsType = {
   singular: "Category",

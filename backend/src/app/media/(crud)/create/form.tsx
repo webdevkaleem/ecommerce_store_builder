@@ -27,7 +27,6 @@ import { type CollectionsType } from "@/lib/const";
 import { labelToSlug } from "@/lib/helper-functions";
 import { useCreateMediaStore } from "@/store/admin/create-media";
 import { api } from "@/trpc/react";
-import Upload from "./upload";
 
 export const MediaType = z.object({
   name: z.string().min(1, "Name is required"),
@@ -163,11 +162,8 @@ export default function CreateForm({
               <FormItem>
                 <FormLabel>Images</FormLabel>
                 <FormControl>
-                  <Upload setFormName={setFormName} />
+                  <p>Upload Image Wrapper</p>
                 </FormControl>
-                <FormDescription>
-                  These are the public display media.
-                </FormDescription>
                 <FormMessage />
               </FormItem>
             )}
