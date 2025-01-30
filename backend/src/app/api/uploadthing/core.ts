@@ -56,34 +56,34 @@ export const ourFileRouter = {
       const commonFileType = file.type;
 
       // 1. Fetch the original image which is uploaded
-      // const responseImage = await fetch(file.url);
+      const responseImage = await fetch(file.url);
 
       // 2. Error check
-      // if (!responseImage.ok) new UploadThingError("Failed to fetch image");
+      if (!responseImage.ok) new UploadThingError("Failed to fetch image");
 
       // 3. Create a buffer of the original image
-      // const bufferImage = await responseImage.arrayBuffer();
+      const bufferImage = await responseImage.arrayBuffer();
 
       // 4. Make mobile & tablet resized buffers using sharp
-      // const mobileBuffer = await sharp(bufferImage).resize(400, 400).toBuffer();
-      // const tabletBuffer = await sharp(bufferImage).resize(600, 600).toBuffer();
+      const mobileBuffer = await sharp(bufferImage).resize(400, 400).toBuffer();
+      const tabletBuffer = await sharp(bufferImage).resize(600, 600).toBuffer();
 
       // 5. Create uploadthing files using the buffers
-      // const mobileImage = new UTFile(
-      //   [mobileBuffer],
-      //   `${commonFileName}/mobile`,
-      //   {
-      //     type: commonFileType,
-      //   },
-      // );
-      // const tabletImage = new UTFile(
-      //   [tabletBuffer],
-      //   `${commonFileName}/tablet`,
-      //   { type: commonFileType },
-      // );
+      const mobileImage = new UTFile(
+        [mobileBuffer],
+        `${commonFileName}/mobile`,
+        {
+          type: commonFileType,
+        },
+      );
+      const tabletImage = new UTFile(
+        [tabletBuffer],
+        `${commonFileName}/tablet`,
+        { type: commonFileType },
+      );
 
       // 6. Upload the files
-      // const savedImages = await utapi.uploadFiles([mobileImage, tabletImage]);
+      const savedImages = await utapi.uploadFiles([mobileImage, tabletImage]);
 
       // 7. ::Check:: If the images were uploaded successfully
       // if (!savedImages[0]?.data) {
@@ -92,30 +92,27 @@ export const ourFileRouter = {
 
       // 8. Create an array of the images with the fields that are to be used in the frontend
       // It includes the original image and the resized images
-      const imagesArr = [
-        { key: file.key, url: file.url, label: "Original Photo" },
-      ]
-        .concat
-        // savedImages
-        //   .map((obj) => {
-        //     if (obj.data) {
-        //       if (obj.data.name.includes("mobile")) {
-        //         return {
-        //           key: obj.data.key,
-        //           url: obj.data.url,
-        //           label: "Mobile Photo",
-        //         };
-        //       } else if (obj.data.name.includes("tablet")) {
-        //         return {
-        //           key: obj.data.key,
-        //           url: obj.data.url,
-        //           label: "Tablet Photo",
-        //         };
-        //       }
-        //     }
-        //   })
-        //   .filter((obj) => obj !== undefined),
-        ();
+      const imagesArr = [{ key: file.key, url: file.url, type: "og" }].concat(
+        savedImages
+          .map((obj) => {
+            if (obj.data) {
+              if (obj.data.name.includes("mobile")) {
+                return {
+                  key: obj.data.key,
+                  url: obj.data.url,
+                  type: "mobile",
+                };
+              } else if (obj.data.name.includes("tablet")) {
+                return {
+                  key: obj.data.key,
+                  url: obj.data.url,
+                  type: "tablet",
+                };
+              }
+            }
+          })
+          .filter((obj) => obj !== undefined),
+      );
 
       // 9. Return data to the frontend
       return {

@@ -27,6 +27,7 @@ import { type CollectionsType } from "@/lib/const";
 import { labelToSlug } from "@/lib/helper-functions";
 import { useCreateMediaStore } from "@/store/admin/create-media";
 import { api } from "@/trpc/react";
+import ImageUploader from "./image-uploader";
 
 export const MediaType = z.object({
   name: z.string().min(1, "Name is required"),
@@ -42,7 +43,7 @@ export default function CreateForm({
   // State management
   const router = useRouter();
   const formRef = useRef(null);
-  const { setName, images } = useCreateMediaStore();
+  const { images } = useCreateMediaStore();
 
   // Derived Functions
   const { mutate, isPending, isSuccess, data, reset } =
@@ -79,13 +80,6 @@ export default function CreateForm({
     if (isValid) {
       await form.handleSubmit(onSubmit)();
     }
-  }
-
-  function setFormName(name: string) {
-    form.setValue("name", labelToSlug(name));
-
-    // Setting to the state
-    setName(labelToSlug(name));
   }
 
   // Hotkeys
@@ -162,7 +156,7 @@ export default function CreateForm({
               <FormItem>
                 <FormLabel>Images</FormLabel>
                 <FormControl>
-                  <p>Upload Image Wrapper</p>
+                  <ImageUploader />
                 </FormControl>
                 <FormMessage />
               </FormItem>
