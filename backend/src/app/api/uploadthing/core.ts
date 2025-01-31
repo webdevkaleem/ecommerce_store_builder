@@ -66,7 +66,7 @@ export const ourFileRouter = {
 
       // 4. Make mobile & tablet resized buffers using sharp
       const mobileBuffer = await sharp(bufferImage).resize(400, 400).toBuffer();
-      const tabletBuffer = await sharp(bufferImage).resize(600, 600).toBuffer();
+      // const tabletBuffer = await sharp(bufferImage).resize(600, 600).toBuffer();
 
       // 5. Create uploadthing files using the buffers
       const mobileImage = new UTFile(
@@ -76,14 +76,15 @@ export const ourFileRouter = {
           type: commonFileType,
         },
       );
-      const tabletImage = new UTFile(
-        [tabletBuffer],
-        `${commonFileName}/tablet`,
-        { type: commonFileType },
-      );
+      // const tabletImage = new UTFile(
+      //   [tabletBuffer],
+      //   `${commonFileName}/tablet`,
+      //   { type: commonFileType },
+      // );
 
       // 6. Upload the files
-      const savedImages = await utapi.uploadFiles([mobileImage, tabletImage]);
+      // const savedImages = await utapi.uploadFiles([mobileImage, tabletImage]);
+      const savedImages = await utapi.uploadFiles([mobileImage]);
 
       // 7. ::Check:: If the images were uploaded successfully
       // if (!savedImages[0]?.data) {
@@ -92,7 +93,15 @@ export const ourFileRouter = {
 
       // 8. Create an array of the images with the fields that are to be used in the frontend
       // It includes the original image and the resized images
-      const imagesArr = [{ key: file.key, url: file.url, type: "og" }].concat(
+      const imagesArr = [
+        {
+          key: file.key,
+          url: file.url,
+          type: "og",
+          name: file.name,
+          size: file.size,
+        },
+      ].concat(
         savedImages
           .map((obj) => {
             if (obj.data) {
@@ -101,12 +110,16 @@ export const ourFileRouter = {
                   key: obj.data.key,
                   url: obj.data.url,
                   type: "mobile",
+                  name: obj.data.name,
+                  size: obj.data.size,
                 };
               } else if (obj.data.name.includes("tablet")) {
                 return {
                   key: obj.data.key,
                   url: obj.data.url,
                   type: "tablet",
+                  name: obj.data.name,
+                  size: obj.data.size,
                 };
               }
             }

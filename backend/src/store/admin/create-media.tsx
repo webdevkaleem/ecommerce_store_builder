@@ -1,33 +1,34 @@
 import { create } from "zustand";
 
-type ImageType = {
-  key: string;
-  url: string;
-  label: string;
-};
+interface MediaType {
+  key?: string;
+  name?: string;
+  url?: string;
+  type?: string;
+  size?: string;
+  extension?: string;
+}
 
-interface CreateMedia {
-  key: string;
-  images: ImageType[];
-  setName: (key: string) => void;
-  pushImages: (images: ImageType[]) => void;
+interface MediaActions {
+  setMedia: (image: MediaType) => void;
+  setName: (name: string) => void;
   resetMedia: () => void;
 }
 
-const initialState = {
-  key: "",
-  images: [],
+const initialState: MediaType = {
+  key: undefined,
+  name: undefined,
+  url: undefined,
+  size: undefined,
+  extension: undefined,
+  type: undefined,
 };
 
-export const useCreateMediaStore = create<CreateMedia>()((set) => ({
-  ...initialState,
-  setName: (key) =>
-    set(() => {
-      return { key };
-    }),
-  pushImages: (images) =>
-    set((og) => {
-      return { images: og.images.concat(images) };
-    }),
-  resetMedia: () => set(() => ({ ...initialState })),
-}));
+export const useCreateMediaStore = create<MediaType & MediaActions>()(
+  (set) => ({
+    ...initialState,
+    setName: (name) => set(() => ({ name })),
+    setMedia: (media) => set(() => ({ ...media })),
+    resetMedia: () => set(() => ({ ...initialState })),
+  }),
+);

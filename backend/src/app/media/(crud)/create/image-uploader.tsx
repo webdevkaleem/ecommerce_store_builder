@@ -1,24 +1,26 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
+import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
+import { bytesToSize, labelToSlug } from "@/lib/helper-functions";
 import { UploadDropzone } from "@/lib/uploadthing";
+import { cn } from "@/lib/utils";
+import { useCreateMediaStore } from "@/store/admin/create-media";
 import { X } from "lucide-react";
 import * as motion from "motion/react-client";
 import { useState } from "react";
 
-export default function ImageUploader() {
-  const [fileUrl, setFileUrl] = useState<string | null>(null);
-  const [fileName, setFileName] = useState<string | null>(null);
+export default function ImageUploader({
+  isNameSubmittedSuccessfully = false,
+}: {
+  isNameSubmittedSuccessfully?: boolean;
+}) {
   const [showAnimation, setShowAnimation] = useState(false);
 
-  function cleanImageState() {
-    setFileUrl(null);
-    setFileName(null);
-
-    return;
-  }
+  const { url, size, extension, resetMedia, setMedia, setName } =
+    useCreateMediaStore();
 
   return (
     <div className="flex flex-col gap-4">
@@ -32,37 +34,44 @@ export default function ImageUploader() {
         endpoint="imageUploader"
         onBeforeUploadBegin={(files) => {
           // Reset the image state before the user upload a new image
-          cleanImageState();
+          resetMedia();
 
           return files;
         }}
         onClientUploadComplete={(res) => {
           if (!res[0]) return;
 
-          const mobileImageUrl = res[0].serverData.images.map((imageObj) => {
+          const mobileImageArr = res[0].serverData.images.map((imageObj) => {
             if (imageObj.type === "mobile") {
-              return imageObj.url;
+              return imageObj;
             }
           });
 
-          mobileImageUrl.map((mobileUrl) => {
+          mobileImageArr.map((mobileObj) => {
             if (!res[0]) return;
 
-            if (mobileUrl) {
-              setFileUrl(mobileUrl);
-              setFileName(res[0].name.split(".")[0] ?? "");
+            if (mobileObj) {
+              setMedia({
+                url: mobileObj.url,
+                extension: "png",
+                size: bytesToSize(mobileObj.size),
+                key: mobileObj.key,
+                type: mobileObj.type,
+              });
             }
           });
         }}
         onUploadError={(error: Error) => {
           // Do something with the error.
+          resetMedia();
+
           console.log(error);
-          setFileUrl(null);
         }}
+        config={{ cn }}
       />
 
       {/* Loading the skeleton */}
-      {fileUrl && (
+      {url && (
         <motion.div
           className="h-32 w-full"
           initial={{ opacity: 1, display: "block" }}
@@ -77,15 +86,15 @@ export default function ImageUploader() {
       )}
 
       {/* Loading the actual image component */}
-      {fileUrl && (
+      {url && (
         <motion.div
-          className="flex h-32 w-full items-center gap-6 rounded-md"
+          className="flex h-32 flex-row items-center gap-4 rounded-md"
           initial={{ opacity: 0 }}
           animate={showAnimation ? { opacity: 1 } : { opacity: 0 }}
         >
-          <picture className="flex w-full gap-6">
+          <picture className="relative flex w-full gap-4">
             <img
-              src={fileUrl}
+              src={url}
               className="h-28 w-28 rounded-md object-cover"
               onLoad={() => {
                 setShowAnimation(true);
@@ -93,18 +102,38 @@ export default function ImageUploader() {
               alt="currently uploaded image"
             />
 
-            <div className="flex w-full items-center">
-              <Input placeholder={`Name`} defaultValue={fileName ?? ""} />
+            <div
+              className="absolute left-1 top-1 flex h-4 w-4 cursor-pointer items-center justify-center rounded-full bg-primary text-primary-foreground"
+              onClick={resetMedia}
+            >
+              <X className="h-3 w-3" />
+            </div>
+
+            <div className="flex w-full flex-col justify-between gap-2">
+              {/* If the length of the name of the media is 0 and the form isn't submitted successfully then we show destructive styles */}
+              <Input
+                placeholder={`Media Name`}
+                onChange={(e) => setName(labelToSlug(e.target.value))}
+                className={cn({
+                  "border-destructive placeholder:text-destructive":
+                    !isNameSubmittedSuccessfully,
+                })}
+              />
+
+              <Separator />
+
+              <div className="flex flex-wrap gap-6">
+                <div className="flex items-center gap-4">
+                  <span className="text-xs">Minimum Size:</span>
+                  <Badge>{size}</Badge>
+                </div>
+                <div className="flex items-center gap-4">
+                  <span className="text-xs">Extention:</span>
+                  <Badge>{extension}</Badge>
+                </div>
+              </div>
             </div>
           </picture>
-
-          {/* Actions */}
-          <div className="flex justify-end">
-            <Button variant={"destructive_outline"} onClick={cleanImageState}>
-              <X />
-              <span>Delete</span>
-            </Button>
-          </div>
         </motion.div>
       )}
     </div>

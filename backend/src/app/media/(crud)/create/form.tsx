@@ -15,13 +15,11 @@ import TopButtons from "@/components/admin/form/top-buttons";
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { type CollectionsType } from "@/lib/const";
 import { labelToSlug } from "@/lib/helper-functions";
@@ -31,7 +29,7 @@ import ImageUploader from "./image-uploader";
 
 export const MediaType = z.object({
   name: z.string().min(1, "Name is required"),
-  keys: z.string().min(1).array().min(1, "You must upload atleast 1 image"),
+  key: z.string().min(1, "You must upload an image"),
 });
 
 // Body
@@ -43,7 +41,8 @@ export default function CreateForm({
   // State management
   const router = useRouter();
   const formRef = useRef(null);
-  const { images } = useCreateMediaStore();
+
+  const { name, key, resetMedia } = useCreateMediaStore();
 
   // Derived Functions
   const { mutate, isPending, isSuccess, data, reset } =
@@ -54,21 +53,28 @@ export default function CreateForm({
     resolver: zodResolver(MediaType),
     defaultValues: {
       name: "",
-      keys: [],
+      key: "",
     },
   });
 
   // Helper Functions
-  function onSubmit(values: z.infer<typeof MediaType>) {
-    mutate({ name: values.name, keys: values.keys });
+  async function onSubmit(values: z.infer<typeof MediaType>) {
+    if (MediaType.safeParse({ key, name }).success) {
+      return mutate({ name: values.name, keys: [values.key] });
+    }
+
+    // Show error states by triggering the form
+    await form.trigger("name");
+    await form.trigger("key");
   }
 
   function onReset() {
     // Show toast, redirect and reset state
     toast.info("Discarded your changes");
+    resetMedia();
 
     // Redirect to main page
-    router.push(labelToSlug(collection.plural));
+    router.push(`/${labelToSlug(collection.plural)}`);
 
     // Reset state
     reset();
@@ -90,13 +96,16 @@ export default function CreateForm({
   });
 
   // Effects
-  // When the state of the images changes, we set the form value to the state
+  // When the state for image name changes, we set the form value to the state
   useEffect(() => {
-    form.setValue(
-      "keys",
-      images.map((imageObj) => imageObj.key),
-    );
-  }, [form, images]);
+    if (name) {
+      form.setValue("name", labelToSlug(name));
+    }
+
+    if (key) {
+      form.setValue("key", key);
+    }
+  }, [name, form, key]);
 
   useEffect(() => {
     // We check for both to be successful because of rerendering issues
@@ -117,6 +126,11 @@ export default function CreateForm({
     }
   }, [collection, data, isSuccess, reset, router]);
 
+  console.log(
+    "FORM NAME SUBMIT BOOLEAN",
+    MediaType.safeParse({ key, name }).success,
+  );
+
   // Render
   return (
     <>
@@ -134,29 +148,16 @@ export default function CreateForm({
 
           <FormField
             control={form.control}
-            name="name"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Name</FormLabel>
-                <FormControl>
-                  <Input placeholder={`Example Media`} {...field} />
-                </FormControl>
-                <FormDescription>
-                  This is the public display name for the media.
-                </FormDescription>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="keys"
+            name="key"
             render={() => (
               <FormItem>
-                <FormLabel>Images</FormLabel>
+                <FormLabel>Media Uploader</FormLabel>
                 <FormControl>
-                  <ImageUploader />
+                  <ImageUploader
+                    isNameSubmittedSuccessfully={
+                      MediaType.safeParse({ key, name }).success
+                    }
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
