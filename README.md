@@ -8,6 +8,7 @@
 This is an open-source e-commerce website builder inspired by platforms like Shopify. Built using the T3 stack, it features a customizable storefront and an admin CMS for managing products and settings.
 
 ### Frontend
+
 <div style="display:flex;">
 <!-- Main -->
 <!-- Nextjs -->
@@ -34,6 +35,7 @@ This is an open-source e-commerce website builder inspired by platforms like Sho
 
 
 ### Backend
+
 <div style="display:flex;">
 <!-- Main -->
 <!-- Nextjs -->
@@ -48,6 +50,7 @@ This is an open-source e-commerce website builder inspired by platforms like Sho
 
 
 ### Databases
+
 <div style="display:flex;">
 <!-- Postgresql -->
 <img style="height:2rem;" src="https://img.shields.io/static/v1?label=&message=Postgres SQL&color=31648C&logo=Postgresql&logoColor=white&style=flat">
@@ -56,29 +59,35 @@ This is an open-source e-commerce website builder inspired by platforms like Sho
 </div>
 
 ### Deployment & Tools
+
 <div style="display:flex;">
 <!-- Vercel -->
 <img style="height:2rem;" src="https://img.shields.io/static/v1?label=&message=Vercel&color=0F0F12&logo=vercel&logoColor=white&style=flat">
 </div>
 
 ### Features
+
 - Customizable Storefront: Users can tailor their online shops through an intuitive admin panel.
 - Admin CMS: Manage products, orders, and settings easily.
 - Low Spec Requirements: Designed to be cost-effective and efficient.
 - Heavy Caching: Optimized for speed and reduced costs.
 
 ### Architecture
+
 - The project is intended to be a monorepo, allowing for easy management of both the admin CMS and storefront. Currently, the admin CMS is under development.
 
 ### Getting Started
+
 - Clone the repository:
 ```bash
 git clone https://github.com/webdevkaleem/ecommerce_store_builder.git
 ```
+
 - Install dependencies:
 ```bash
 npm install
 ```
+
 - Create a `.env` file in the root directory and add the following variables:
 ```bash
 # Postgres (Database)
@@ -91,7 +100,16 @@ UPSTASH_REDIS_REST_TOKEN=""
 # Uploadthing
 UPLOADTHING_TOKEN=""
 ```
-- Run the project:
+
+- Setting up the database:
+```bash
+npm run db:generate
+```
+```bash
+npm run db:migrate
+```
+
+- Run the project locally:
 ```bash
 npm run dev
 ```
