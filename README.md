@@ -61,8 +61,8 @@ This is an open-source e-commerce website builder inspired by platforms like Sho
 ### Deployment & Tools
 
 <div style="display:flex;">
-<!-- Vercel -->
-<img style="height:2rem;" src="https://img.shields.io/static/v1?label=&message=Vercel&color=0F0F12&logo=vercel&logoColor=white&style=flat">
+<!-- Railway -->
+<img style="height:2rem;" src="https://img.shields.io/static/v1?label=&message=Railway&color=0F0F12&logo=railway&logoColor=white&style=flat">
 </div>
 
 ### Features
