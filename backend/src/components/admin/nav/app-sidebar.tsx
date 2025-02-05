@@ -99,6 +99,12 @@ const sideNavs: {
         href: "/media",
         icon: <Images />,
       },
+      {
+        id: "4",
+        label: "Products",
+        href: "/products",
+        icon: <BringToFront />,
+      },
     ],
   },
   {
