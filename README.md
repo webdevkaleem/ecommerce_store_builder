@@ -78,17 +78,17 @@ This is an open-source e-commerce website builder inspired by platforms like Sho
 
 ### Getting Started
 
-- Clone the repository:
+Clone the repository:
 ```bash
 git clone https://github.com/webdevkaleem/ecommerce_store_builder.git
 ```
 
-- Install dependencies:
+Install dependencies:
 ```bash
 npm install
 ```
 
-- Create a `.env` file in the root directory and add the following variables:
+Create a `.env` file in the root directory and add the following variables:
 ```bash
 # Postgres (Database)
 DATABASE_URL=""
@@ -101,7 +101,7 @@ UPSTASH_REDIS_REST_TOKEN=""
 UPLOADTHING_TOKEN=""
 ```
 
-- Setting up the database:
+Setting up the database:
 ```bash
 npm run db:generate
 ```
@@ -109,7 +109,7 @@ npm run db:generate
 npm run db:migrate
 ```
 
-- Run the project locally:
+Run the project locally:
 ```bash
 npm run dev
 ```
