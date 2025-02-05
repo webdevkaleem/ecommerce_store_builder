@@ -108,6 +108,7 @@ const sideNavs: {
         label: "Media",
         href: "/media",
         icon: <Images />,
+        disabled: true,
       },
       {
         id: "4",
