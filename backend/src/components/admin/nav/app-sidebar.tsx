@@ -37,13 +37,20 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import React from "react";
 import ThemeSwitch from "./theme-switch";
+import { cn } from "@/lib/utils";
 
 // Body
 const sideNavs: {
   id: string;
   label: string;
   href: string;
-  links: { id: string; label: string; href: string; icon?: React.ReactNode }[];
+  links: {
+    id: string;
+    label: string;
+    href: string;
+    icon?: React.ReactNode;
+    disabled?: boolean;
+  }[];
 }[] = [
   {
     id: "1",
@@ -61,18 +68,21 @@ const sideNavs: {
         label: "Statistics",
         href: "/statistics",
         icon: <ChartNoAxesCombined />,
+        disabled: true,
       },
       {
         id: "3",
         label: "Orders",
         href: "/orders",
         icon: <BringToFront />,
+        disabled: true,
       },
       {
         id: "4",
         label: "Announcements",
         href: "/announcements",
         icon: <SatelliteDish />,
+        disabled: true,
       },
     ],
   },
@@ -104,6 +114,7 @@ const sideNavs: {
         label: "Products",
         href: "/products",
         icon: <BringToFront />,
+        disabled: true,
       },
     ],
   },
@@ -116,11 +127,13 @@ const sideNavs: {
         id: "1",
         label: "Settings",
         href: "/settings",
+        disabled: true,
       },
       {
         id: "2",
         label: "Usage",
         href: "/usage",
+        disabled: true,
       },
     ],
   },
@@ -141,7 +154,13 @@ export function AppSidebar() {
                 <SidebarMenu>
                   {sideNav.links.map((link) => {
                     return (
-                      <SidebarMenuSub key={link.id}>
+                      <SidebarMenuSub
+                        key={link.id}
+                        className={cn({
+                          "pointer-events-none cursor-none opacity-50":
+                            link.disabled,
+                        })}
+                      >
                         <SidebarMenuSubButton
                           onClick={() => setOpenMobile(false)}
                           asChild

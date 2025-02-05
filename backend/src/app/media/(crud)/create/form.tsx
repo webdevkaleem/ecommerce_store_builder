@@ -126,11 +126,6 @@ export default function CreateForm({
     }
   }, [collection, data, isSuccess, reset, router]);
 
-  console.log(
-    "FORM NAME SUBMIT BOOLEAN",
-    MediaType.safeParse({ key, name }).success,
-  );
-
   // Render
   return (
     <>
