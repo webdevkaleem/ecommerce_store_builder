@@ -57,7 +57,7 @@ export const columns: ColumnDef<z.infer<typeof selectSubCategory>>[] = [
     cell: ({ row }) => {
       return (
         <Link
-          href={"/categories/" + String(row.getValue("categoryId"))}
+          href={"/categories/" + String(row.getValue("categoryId")) + "edit"}
           className="line-clamp-1 truncate"
         >
           <Badge variant="outline">Category</Badge>
