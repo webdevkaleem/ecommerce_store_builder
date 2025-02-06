@@ -47,7 +47,7 @@ export default function EditForm(category: z.infer<typeof selectCategory>) {
   const formRef = useRef(null);
 
   // Consts
-  const backPathname = "/categories/" + `${category.id}`;
+  const backPathname = "/categories";
 
   // Derived Functions
   const { mutate, isPending, isSuccess, data, reset } =
